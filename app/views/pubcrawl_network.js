@@ -112,39 +112,39 @@ var NodeTableView = Backbone.View.extend({
 
     render: function(){
         var docConfig = [
-            {headerName:'PMID', headerWidth: '10%', propName:'pmid', urlLink:'http://www.ncbi.nlm.nih.gov/pubmed/'},
-            {headerName:'Title', headerWidth: '50%', propName: 'article_title'},
-            {headerName:'Pub. Year', headerWidth: '10%', propName: 'pub_date_year'}
+            {headerName:"PMID", headerWidth: "10%", propName:"pmid", urlLink:"http://www.ncbi.nlm.nih.gov/pubmed/"},
+            {headerName:"Title", headerWidth: "50%", propName: "article_title"},
+            {headerName:"Pub. Year", headerWidth: "10%", propName: "pub_date_year"}
         ];
 
         var expConfig = [
-            {propName:'abstract_text'}
+            {propName:"abstract_text"}
         ];
 
-        var ViewClass = qed.Views['datatable'];
+        var ViewClass = qed.Views["datatable"];
         this.docView = new ViewClass({dataConfig: docConfig, expandedConfig: expConfig, checkbox: false, tableId: "nodedocTable",model: this.model.docs});
         this.$el.find(".docTableView").html(this.docView.render().el);
 
         var nmdConfig = [
-            {headerName:'Name', headerWidth: '30%', propName:'name'},
-            {headerName:'Term Single Count', headerWidth: '10%', propName: 'termcount'},
-            {headerName:'Term Combo Count', headerWidth: '10%', propName: 'combocount'},
-            {headerName:'NMD', headerWidth: '10%', propName: 'nmd'}
+            {headerName:"Name", headerWidth: "30%", propName:"name"},
+            {headerName:"Term Single Count", headerWidth: "10%", propName: "termcount"},
+            {headerName:"Term Combo Count", headerWidth: "10%", propName: "combocount"},
+            {headerName:"NMD", headerWidth: "10%", propName: "nmd"}
         ];
 
         this.nmdView = new ViewClass({dataConfig: nmdConfig, checkbox: false, tableId: "nodenmdTable",model: this.model.nmdDetailsModel});
         this.$el.find(".nmdTableView").html(this.nmdView.render().el);
 
         var dataConfig = [
-            {headerName:'Term1', headerWidth: '30%', propName:'term1'},
-            {headerName:'Term2', headerWidth: '10%', propName: 'term2'},
-            {headerName:'UniProt ID1', headerWidth: '10%', propName: 'uni1'},
-            {headerName:'UniProt ID2', headerWidth: '10%', propName: 'uni2'},
-            {headerName:'Domain 1', headerWidth: '10%', propName: 'pf1'},
-            {headerName:'Domain 2', headerWidth: '10%', propName: 'pf2'},
-            {headerName:'Type', headerWidth: '10%', propName: 'type'},
-            {headerName:'Domain 1 Count', headerWidth: '10%', propName: 'pf1_count'},
-            {headerName:'Domain 2 Count', headerWidth: '10%', propName: 'pf2_count'}
+            {headerName:"Term1", headerWidth: "30%", propName:"term1"},
+            {headerName:"Term2", headerWidth: "10%", propName: "term2"},
+            {headerName:"UniProt ID1", headerWidth: "10%", propName: "uni1"},
+            {headerName:"UniProt ID2", headerWidth: "10%", propName: "uni2"},
+            {headerName:"Domain 1", headerWidth: "10%", propName: "pf1"},
+            {headerName:"Domain 2", headerWidth: "10%", propName: "pf2"},
+            {headerName:"Type", headerWidth: "10%", propName: "type"},
+            {headerName:"Domain 1 Count", headerWidth: "10%", propName: "pf1_count"},
+            {headerName:"Domain 2 Count", headerWidth: "10%", propName: "pf2_count"}
         ];
 
         this.domineView = new ViewClass({dataConfig: dataConfig, checkbox: false, tableId: "nodedomineTable",model: this.model.domineDetailsModel});
@@ -163,37 +163,37 @@ var EdgeTableView = Backbone.View.extend({
 
     render: function(){
         var docConfig = [
-            {headerName:'PMID', headerWidth: '5%', propName:'pmid', urlLink:'http://www.ncbi.nlm.nih.gov/pubmed/'},
-            {headerName:'Title', headerWidth: '50%', propName: 'article_title'},
-            {headerName:'Pub. Year', headerWidth: '5%', propName: 'pub_date_year'}
+            {headerName:"PMID", headerWidth: "5%", propName:"pmid", urlLink:"http://www.ncbi.nlm.nih.gov/pubmed/"},
+            {headerName:"Title", headerWidth: "50%", propName: "article_title"},
+            {headerName:"Pub. Year", headerWidth: "5%", propName: "pub_date_year"}
         ];
 
-        var expConfig = [{propName:'abstract_text'}];
-        var ViewClass = qed.Views['datatable'];
+        var expConfig = [{propName:"abstract_text"}];
+        var ViewClass = qed.Views["datatable"];
         this.docView = new ViewClass({dataConfig: docConfig, expandedConfig: expConfig, checkbox: false, tableId: "edgedocTable",model: this.model.docs});
         this.$el.find(".docTableView").html(this.docView.render().el);
 
         var nmdConfig = [
-            {headerName:'Term1', headerWidth: '20%', propName:'term1'},
-            {headerName: 'Term2', headerWidth: '20%', propName: 'term2'},
-            {headerName:'Term Single Count', headerWidth: '10%', propName: 'termcount'},
-            {headerName:'Term Combo Count', headerWidth: '10%', propName: 'combocount'},
-            {headerName:'NMD', headerWidth: '20%', propName: 'nmd'}
+            {headerName:"Term1", headerWidth: "20%", propName:"term1"},
+            {headerName:"Term2", headerWidth: "20%", propName: "term2"},
+            {headerName:"Term Single Count", headerWidth: "10%", propName: "termcount"},
+            {headerName:"Term Combo Count", headerWidth: "10%", propName: "combocount"},
+            {headerName:"NMD", headerWidth: "20%", propName: "nmd"}
         ];
 
         this.nmdView = new ViewClass({dataConfig: nmdConfig, checkbox: false, tableId: "edgenmdTable",model: this.model.nmdDetailsModel});
         this.$el.find(".nmdTableView").html(this.nmdView.render().el);
 
         var dataConfig = [
-            {headerName:'Term1', headerWidth: '10%', propName:'term1'},
-            {headerName:'Term2', headerWidth: '10%', propName: 'term2'},
-            {headerName:'UniProt ID1', headerWidth: '10%', propName: 'uni1'},
-            {headerName:'UniProt ID2', headerWidth: '10%', propName: 'uni2'},
-            {headerName:'Domain 1', headerWidth: '10%', propName: 'pf1'},
-            {headerName:'Domain 2', headerWidth: '10%', propName: 'pf2'},
-            {headerName:'Type', headerWidth: '10%', propName: 'type'},
-            {headerName:'Domain 1 Count', headerWidth: '10%', propName: 'pf1_count'},
-            {headerName:'Domain 2 Count', headerWidth: '10%', propName: 'pf2_count'}
+            {headerName:"Term1", headerWidth: "10%", propName:"term1"},
+            {headerName:"Term2", headerWidth: "10%", propName: "term2"},
+            {headerName:"UniProt ID1", headerWidth: "10%", propName: "uni1"},
+            {headerName:"UniProt ID2", headerWidth: "10%", propName: "uni2"},
+            {headerName:"Domain 1", headerWidth: "10%", propName: "pf1"},
+            {headerName:"Domain 2", headerWidth: "10%", propName: "pf2"},
+            {headerName:"Type", headerWidth: "10%", propName: "type"},
+            {headerName:"Domain 1 Count", headerWidth: "10%", propName: "pf1_count"},
+            {headerName:"Domain 2 Count", headerWidth: "10%", propName: "pf2_count"}
         ];
 
         this.domineView = new ViewClass({dataConfig: dataConfig, checkbox: false, tableId: "edgedomineTable",model: this.model.domineDetailsModel});
