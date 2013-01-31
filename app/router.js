@@ -18,21 +18,21 @@ module.exports = Backbone.Router.extend({
     },
 
     views: {
-        "grid": require("../views/grid_view"),
-        "circ": require("../views/circvis_view"),
-        "stacksvis": require("../views/stacksvis_container"),
-        "graph": require("../views/graphtree_view"),
-        "pwpv": require("../views/pwpv_view"),
-        "twoD": require("../views/2D_Distribution_view"),
+        "grid": require("views/grid_view"),
+        "circ": require("views/circvis_view"),
+        "stacksvis": require("views/stacksvis_container"),
+        "graph": require("views/graphtree_view"),
+        "pwpv": require("views/pwpv_view"),
+        "twoD": require("views/2D_Distribution_view"),
         "kde": null,
-        "parcoords": require("../views/parcoords_view"),
-        "mutsig_grid_view": require("../views/mutsig_grid_view"),
-        "scatterplot": require("../views/scatterplot_view"),
-        "seqpeek": require("../views/seqpeek_view")
+        "parcoords": require("views/parcoords_view"),
+        "mutsig_grid_view": require("views/mutsig_grid_view"),
+        "scatterplot": require("views/scatterplot_view"),
+        "seqpeek": require("views/seqpeek_view")
     },
 
     initTopNavBar:function() {
-        var TopNavBar = require("../views/topbar_view");
+        var TopNavBar = require("views/topbar_view");
         var topnavbar = new TopNavBar();
         $("#navigation-container").append(topnavbar.render().el);
 
@@ -81,26 +81,26 @@ module.exports = Backbone.Router.extend({
     },
     
     mutsig_grid_view:function () {
-        var MutSigGrid = require("../views/mutsig_grid_view");
+        var MutSigGrid = require("views/mutsig_grid_view");
         var mutsigGridView = new MutSigGrid();
         this.$el.html(mutsigGridView.render().el);
     },
 
     scatterplot_view:function () {
-        var Scatterplot = require("../views/scatterplot_view");
+        var Scatterplot = require("views/scatterplot_view");
         var scatterplotView = new Scatterplot();
         this.$el.html(scatterplotView.render().el);
     },
 
     seqpeek_view:function () {
-        var SeqPeek = require("../views/seqpeek_view");
+        var SeqPeek = require("views/seqpeek_view");
         var seqpeekView = new SeqPeek();
         this.$el.html(seqpeekView.render().el);
     },
 
     twod_view:function (label1, label2) {
         var TwoD = qed.Views.twoD;
-        var FL = require("../models/featureList");
+        var FL = require("models/featureList");
         var fl = new FL({
             websvc:"/endpoints/filter_by_id?filepath=%2Ffeature_matrices%2F2012_09_18_0835__cons&IDs=",
             feature_list:[label1, label2]
