@@ -1,12 +1,15 @@
-from tornado.options import options
+from tornado.options import options, define, logging
 import tornado.web
 import os
 import sys
 from auth_decorator import authenticated
 
+define("data_path", default="../..", help="Path to data files")
+
 class LocalFileHandler(tornado.web.RequestHandler):
     @authenticated
     def get(self,filepath):
+        logging.info("--data_path=%s" % options.data_path)
         try:
             rows=self.get_arguments("rows")
             cols=self.get_arguments("cols")

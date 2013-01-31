@@ -9,10 +9,10 @@
             "comment": "Provides access to remote web services and databases.  Add mappings for different URI namespaces"
         },
         {
-            "url":"/svc/config",
+            "url":"/svc",
             "host":"localhost",
             "port":8000,
-            "comment": "Provides access to local configuration files (display.json, datamodel.json)"
+            "comment": "Provides access to services running locally such as configuration files (display.json, datamodel.json)"
         }
     ]
 }

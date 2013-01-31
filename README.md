@@ -35,10 +35,15 @@ These library packages are offered as downloadable distributions here (add link)
 and the brunch build system will automatically include them.  These libraries should NOT be checked-in to individual projects.
 
 ### Required Third-party Dependencies ###
+  * Backbone
+  * Underscore
+  * d3.js
+  * jQuery
+  * Bootstrap
 
 # Runtime Configuration #
-This template is meant to standardize the development of new HTML5 web applications and web services in the Cancer Regulome project.  The web application will
-contain runtime dependencies on the following JSON configuration files:
+This template is meant to standardize the development of new HTML5 web applications and web services in the Cancer Regulome project.  The configuration files for
+the web application will reside here ... The following JSON configuration files control the configuration of the application at runtime:
 
 * display.json - specifies titles, labels, and links in the About menu
 
@@ -58,3 +63,12 @@ different data elements to different views
 
     }
 ```
+
+# Initial Dev Setup #
+1. Clone this repository
+2. Install Required Dependencies (see above, link)
+3. Download Third-Party JavaScript libraries and extract into root directory
+4. Execute ```npm install```
+5. Execute ```npm start```
+6. Start tornado web services ```python websvcs/tornadoapp.py --config_file=/local/path/to/tornado.config'```
+6. Open browser at http://localhost:3333

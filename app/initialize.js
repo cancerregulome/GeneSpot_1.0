@@ -36,7 +36,7 @@ $(function () {
     };
 
     qed.Display.fetch({
-        url:"svc/configuration/display.json",
+        url:"svc/configurations/display.json",
         success:function () {
             document.title = (qed.Display.get("title") || "QED");
         }

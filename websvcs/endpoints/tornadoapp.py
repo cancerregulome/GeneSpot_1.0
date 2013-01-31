@@ -24,16 +24,16 @@ import tornado.ioloop
 from tornado.options import define, options, logging
 import tornado.web
 import json
+import os
 import sys
 import uuid
 
 from auth_decorator import authenticated
 from data import LocalFileHandler
 from storage import MongoDbLookupHandler, MongoDbPairwiseLookupHandler, MongoDbMutSigHandler, MongoDbFeaturesByLocationHandler, MongoDbStorageHandler, GetUserinfo
-from analysis import RegulomeExplorerDbQueryHandler
 from oauth import GoogleOAuth2Handler, GoogleSignoutHandler
 
-define("data_path", default="../..", help="Path to data files")
+define("web_configs", default="../..", help="Path to web configuration files (e.g. display.json, datamodel.json)")
 define("port", default=8000, help="run on the given port", type=int)
 define("client_host", default="http://localhost:8000", help="Client URL for Google OAuth2")
 define("client_id", help="Client ID for Google OAuth2")
@@ -96,6 +96,16 @@ class AuthProvidersHandler(tornado.web.RequestHandler):
         self.write({"providers":providers});
         self.set_status(200)
 
+class WebConfigurationsHandler(tornado.web.RequestHandler):
+    def get(self,filepath):
+        try:
+            rfile = open(options.web_configs + filepath)
+            self.write(rfile.read())
+            rfile.close()
+
+        except:
+            raise tornado.web.HTTPError(404)
+
 def main():
     tornado.options.parse_command_line()
     if not options.config_file is None:
@@ -105,7 +115,7 @@ def main():
     settings["cookie_secret"] = options.client_secret
 
     logging.info("Starting Tornado web server on http://localhost:%s" % options.port)
-    logging.info("--data_path=%s" % options.data_path)
+    logging.info("--web_configs=%s" % options.web_configs)
     logging.info("--client_host=%s" % options.client_host)
     logging.info("--authorized_users=%s" % options.authorized_users)
     logging.info("--mongo_uri=%s" % options.mongo_uri)
@@ -117,18 +127,15 @@ def main():
 
     application = tornado.web.Application([
         (r"/", MainHandler),
-        (r"/data?(.*)", LocalFileHandler),
         (r"/auth/signin/google", GoogleOAuth2Handler),
         (r"/auth/signin/google/oauth2_callback", GoogleOAuth2Handler),
         (r"/auth/signout/google", GoogleSignoutHandler),
         (r"/auth/whoami", WhoamiHandler),
         (r"/auth/providers", AuthProvidersHandler),
+        (r"/data?(.*)", LocalFileHandler),
+        (r"/configurations?(.*)", WebConfigurationsHandler),
         (r"/storage/(.*)", MongoDbStorageHandler),
-        (r"/lookups?(.*)", MongoDbLookupHandler),
-        (r"/mutsig_rankings?(.*)", MongoDbMutSigHandler),
-        (r"/pw_lookups?(.*)", MongoDbMutSigHandler),
-        (r"/features_by_location?(.*)", MongoDbFeaturesByLocationHandler),
-        (r"/RE/query/?(.*)", RegulomeExplorerDbQueryHandler)
+        (r"/lookups?(.*)", MongoDbLookupHandler)
     ], **settings)
     application.listen(options.port, **server_settings)
     tornado.ioloop.IOLoop.instance().start()
