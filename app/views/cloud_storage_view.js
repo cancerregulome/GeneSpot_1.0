@@ -1,4 +1,4 @@
-var Template = require("./templates/modals_cloud_storage");
+var Template = require("././modals_cloud_storage");
 
 module.exports = Backbone.View.extend({
 

@@ -1,5 +1,5 @@
 var View = require('./view');
-var LineItemTemplate = require("./templates/line_item");
+var LineItemTemplate = require("././line_item");
 
 module.exports = View.extend({
 

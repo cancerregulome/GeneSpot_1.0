@@ -1,6 +1,6 @@
 var View = require("./view");
-var template = require("./templates/data_menu_modal");
-var LineItemTemplate = require("./templates/line_item");
+var template = require("././data_menu_modal");
+var LineItemTemplate = require("././line_item");
 
 module.exports = View.extend({
     template:template,

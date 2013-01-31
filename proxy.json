@@ -1,70 +1,18 @@
 {
     "proxy":[
         {
-            "url":"/svc/pw_lookups",
-            "rewrite_url":"http://genespot.cancerregulome.org",
-            "host":"genespot.cancerregulome.org",
+            "url":"/svc/production",
+            "rewrite_url":"http://prod-server.cancerregulome.org",
+            "host":"prod-server.cancerregulome.org",
             "port":80,
-            "keep_url":true
+            "keep_url":true,
+            "comment": "Provides access to remote web services and databases.  Add mappings for different URI namespaces"
         },
         {
-            "url":"/svc/lookups",
-            "rewrite_url":"http://genespot.cancerregulome.org",
-            "host":"genespot.cancerregulome.org",
-            "port":80,
-            "keep_url":true
-        },
-        {
-            "url":"/svc/rt_pairwise",
-            "rewrite_url":"http://genespot.cancerregulome.org",
-            "host":"genespot.cancerregulome.org",
-            "port":80,
-            "keep_url":true
-        },
-        {
-            "url":"/svc/graphs/pubcrawl",
-            "rewrite_url":"http://genespot.cancerregulome.org",
-            "host":"genespot.cancerregulome.org",
-            "port":80,
-            "keep_url":true
-        },
-        {
-            "url":"/svc/pubmed/solr",
-            "rewrite_url":"http://genespot.cancerregulome.org",
-            "host":"genespot.cancerregulome.org",
-            "port":80,
-            "keep_url":true
-        },
-        {
-            "url":"/svc/mutsig_rankings",
-            "rewrite_url":"http://genespot.cancerregulome.org",
-            "host":"genespot.cancerregulome.org",
-            "port":80,
-            "keep_url":true
-        },
-        {
-            "url":"/svc/features_by_location",
-            "rewrite_url":"http://genespot.cancerregulome.org",
-            "host":"genespot.cancerregulome.org",
-            "port":80,
-            "keep_url":true
-        },
-        {
-            "url":"/svc/data/lookups",
-            "rewrite_url":"http://genespot.cancerregulome.org",
-            "host":"genespot.cancerregulome.org",
-            "port":80,
-            "keep_url":true
-        },
-        {
-            "url":"/svc",
+            "url":"/svc/config",
             "host":"localhost",
-            "port":8000
-        },
-        {
-            "url":"/graph_layout",
-            "host":"localhost",
-            "port":8010
+            "port":8000,
+            "comment": "Provides access to local configuration files (display.json, datamodel.json)"
         }
     ]
 }

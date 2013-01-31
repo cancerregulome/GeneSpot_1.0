@@ -1,10 +1,8 @@
 var View = require('./view');
-var template = require('./templates/grid');
-var FeatureMatrix = require('../models/featureMatrix');
+var template = require('../templates/grid');
 
 module.exports = View.extend({
 
-  collection:FeatureMatrix,
   template:template,
 
   initialize : function() {

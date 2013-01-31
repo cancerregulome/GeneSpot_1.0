@@ -1,5 +1,5 @@
+# See docs at http://brunch.readthedocs.org/en/latest/config.html.
 exports.config =
-  # See docs at http://brunch.readthedocs.org/en/latest/config.html.
   paths:
     public: '_public'
   files:
@@ -8,6 +8,7 @@ exports.config =
       joinTo:
         'js/app.js': /^app/
         'js/vendor.js': /^vendor/
+        'js/isb.js': /^isb/
       order:
         before: [
           'vendor/js/console-helper.js',
@@ -16,22 +17,22 @@ exports.config =
           'vendor/js/underscore-1.4.2.js',
           'vendor/js/backbone-0.9.2.js',
           'vendor/js/backbone-mediator.js',
-          'vendor/js/d3.v2.js',
-          'vendor/js/vq.js'
+          'isb/js/d3.v2.js',
+          'isb/js/vq.js'
         ]
         after: [
-          'vendor/js/d3.parcoords.js',
+          'isb/js/d3.parcoords.js',
           'vendor/js/slick.core.js',
           'vendor/js/slick.grid.js',
           'vendor/js/slick.rowselectionmodel.js'
         ]
-   
+
     stylesheets:
       defaultExtension: 'less'
       joinTo: 'css/app.css'
       order:
         after: [
-          'app/css/vis.css'
+          'isb/css/vis.css'
         ]
 
     templates:
@@ -43,4 +44,4 @@ exports.config =
     port: 3333
     run: yes
 
-  # minify: true
+# minify: true

@@ -1,5 +1,5 @@
 var View = require("./view");
-var template = require("./templates/sign_in");
+var template = require("././sign_in");
 
 module.exports = View.extend({
     template: template,

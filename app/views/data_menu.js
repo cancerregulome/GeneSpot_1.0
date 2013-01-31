@@ -1,5 +1,5 @@
 var View = require('./view');
-var template = require("./templates/data_dropdown_menu");
+var template = require("././data_dropdown_menu");
 
 module.exports = View.extend({
     template: template,

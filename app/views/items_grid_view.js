@@ -1,4 +1,4 @@
-var Template = require("./templates/items_grid");
+var Template = require("././items_grid");
 
 module.exports = Backbone.View.extend({
 

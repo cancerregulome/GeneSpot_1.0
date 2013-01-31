@@ -1,9 +1,9 @@
-var Template = require("./templates/topbar");
-var SignInModal = require("./templates/sign_in_modal");
+var Template = require("././topbar");
+var SignInModal = require("././sign_in_modal");
 var SignInView = require("./sign_in");
 var SessionsView = require("./sessions_view");
-var HangoutLink = require("./templates/hangout_link");
-var AboutLink = require("./templates/about_link");
+var HangoutLink = require("././hangout_link");
+var AboutLink = require("././about_link");
 var CloudStorageView = require("../views/cloud_storage_view");
 
 module.exports = Backbone.View.extend({
