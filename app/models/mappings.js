@@ -1,6 +1,5 @@
-var Model = require('./model');
+module.exports = Backbone.Model.extend({
 
-module.exports = Model.extend({
     initialize:function (options) {
         _.extend(this, options);
     },
@@ -24,10 +23,10 @@ module.exports = Model.extend({
             return null;
         }));
 
-        return { "items": items, "itemsById": itemsById};
+        return { "items":items, "itemsById":itemsById};
     },
 
     fetch:function (options) {
-        return Model.prototype.fetch.call(this, _.extend({}, options, {dataType:'text'}));
+        return Backbone.Model.prototype.fetch.call(this, _.extend({}, options, {dataType:"text"}));
     }
 });

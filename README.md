@@ -34,6 +34,8 @@ This template packages third-party JavaScript libraries into a single vendor.js 
 These library packages are offered as downloadable distributions here (add link).  Developers should download these into their development and production environments,
 and the brunch build system will automatically include them.  These libraries should NOT be checked-in to individual projects.
 
+### Required Third-party Dependencies ###
+
 # Runtime Configuration #
 This template is meant to standardize the development of new HTML5 web applications and web services in the Cancer Regulome project.  The web application will
 contain runtime dependencies on the following JSON configuration files:

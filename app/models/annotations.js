@@ -1,4 +1,5 @@
 module.exports = Backbone.Model.extend({
+
     initialize:function (options) {
         _.extend(this, options);
     },
@@ -31,6 +32,6 @@ module.exports = Backbone.Model.extend({
     },
 
     fetch:function (options) {
-        return Backbone.Model.prototype.fetch.call(this, _.extend({dataType: this.get("dataType") || 'text'}, options));
+        return Backbone.Model.prototype.fetch.call(this, _.extend({dataType: this.get("dataType") || "text"}, options));
     }
 });

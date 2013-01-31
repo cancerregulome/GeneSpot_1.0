@@ -1,0 +1,81 @@
+{
+    "data_sets":{
+        "label":"Data Sets",
+        "mutations":{
+            "label":"Mutations",
+            "catalog":{
+                "Protein_Mutations_Per_Cancer_Type":{
+                    "id":"Protein_Mutations_Per_Cancer_Type",
+                    "label":"Protein Mutations Per Cancer Type",
+                    "service":"lookups/mutations",
+                    "description":"This dataset was prepared from TCGA MAF files produced by Firehose",
+                    "provenance":"provenance_v7_23nov_2012.txt",
+                    "model":"Mutations"
+                },
+                "mutsig_rankings":{
+                    "id":"mutsig_rankings",
+                    "label":"MutSig Rankings",
+                    "service":"lookups/mutsig_rankings",
+                    "description":"This dataset was prepared from TCGA MutSig 2.0 data produced by Firehose"
+                },
+                "mutsig_top20":{
+                    "id":"mutsig_top20",
+                    "label":"MutSig Top20",
+                    "service":"mutsig_rankings"
+                },
+                "mutsig_provenance":{
+                    "id":"mutsig_provenance",
+                    "label":"MutSig Provenance",
+                    "service":"data/provenance/mutsig_provenance.json"
+                }
+            }
+        },
+        "newMerge.05nov":{
+            "label":"Merged Feature Matrices (11/05/2012)",
+            "catalog":{
+                "all_pairs":{
+                    "service":"lookups/newMerge_05nov",
+                    "model":"FeatureMatrix"
+                },
+                "annotated_features":{
+                    "id":"annotated_features",
+                    "service":"lookups/fmx_newMerge_05nov",
+                    "description":"This dataset was prepared from TCGA feature matrices produced by Firehose and aggregated at ISB",
+                    "label":"Annotated Features",
+                    "model":"FeatureMatrix"
+                }
+            }
+        },
+        "analysis":{
+            "label":"Analysis",
+            "pairwise_newMerge.05nov":{
+                "label":"PairWise Associations from Merged Feature Matrices (11/05/2012)",
+                "service":"lookups/newMerge.05nov/pairwise",
+                "catalog_defaults":{
+                    "model":"Associations",
+                    "nodes":"edges"
+                },
+                "view_options":{
+                    "x":"r1",
+                    "y":"r2",
+                    "edgeRouting":"straight"
+                },
+                "column_headers":[
+                    "target feature",
+                    "predictor feature",
+                    "p-value",
+                    "importance score",
+                    "correlation coefficient",
+                    "# of non-NA values"
+                ],
+                "layouts":{
+                    "fiedler":{
+                        "model":"GraphLayouts",
+                        "dataType":"json",
+                        "nodes":"features"
+                    }
+                }
+            }
+        }
+    }
+}

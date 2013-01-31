@@ -5,14 +5,7 @@ $(function () {
             "Catalogs":require("models/catalog"),
             "Annotations":require("models/annotations"),
             "Mappings":require("models/mappings"),
-            "FeatureMatrix":require("models/featureMatrix2"),
-            "FeatureMatrixFromTsv":require("models/featureMatrixFromTsv"),
-            "FeatureMatrixAsTable":require("models/featureMatrix2asTable"),
-            "FeatureMatrix3":require("models/featureMatrix3"),
-            "GraphLayouts":require("models/graph_layouts"),
-            "Mutations":require("models/mutations_interpro"),
-            "PubcrawlNetwork":require("models/pubcrawlNetwork"),
-            "PubcrawlLit": require("models/pubcrawlLit"),
+            "FeatureMatrix":require("models/feature_matrix"),
             "Default":Backbone.Model.extend({
                 url: function() {
                     return this.get("data_uri");
@@ -21,48 +14,14 @@ $(function () {
         },
         ViewMappings:{
             "Annotations":[
-                { "id":"grid", label:"Grid" }
+                { "id":"items_grid", label:"Grid" }
             ],
             "FeatureMatrix":[
-                { "id":"grid", label:"Grid" },
-                { "id":"stacksvis", label:"Stacks" },
-                { "id":"xfeaturegrid", label:"Cross-Feature Summary" }
-            ],
-            "FeatureMatrixAsTable":[
-                { "id":"grid", label:"Grid" },
-                { "id":"stacksvis", label:"Stacks" }
-            ],
-            "GraphLayouts":[
-                { "id":"circ", label:"CircVis" },
-                { "id":"grid", label:"Grid" },
-                { "id":"graph", label:"Graph" }
-            ],
-            "Mutations": [
-                { "id":"seqpeek", label:"Mutation Viewer" }
+                { "id":"items_grid", label:"Grid" }
             ]
         },
         Views:{
-            "grid":require("views/grid_view"),
-            "circ":require("views/circvis_view"),
-            "stacksvis":require("views/stacksvis_container"),
-            "stacksvis2":require("views/stacksvis_simpler"),
-            "graph":require("views/graphtree_view"),
-            "pwpv":require("views/pwpv_view"),
-            "twoD":require("views/2D_Distribution_view"),
-            "kde":null,
-            "parcoords":require("views/parcoords_view"),
-            "seqpeek":require("views/seqpeek_view"),
-            "xfeaturegrid": require("views/xfeaturegrid"),
-            "xfeaturegrid_small": require("views/xfeaturegrid_small"),
-            "mutsig_grid": require("views/mutsig_grid_view"),
-            "mutsig_top_genes": require("views/mutsig_top_genes_view"),
-            "scatterplot": require("views/scatterplot_view"),
-            "linear_browser": require("views/linear_browser"),
-            "datatable": require("views/datatable_view"),
-            "pubcrawl_network": require("views/pubcrawl_network"),
-            "pubcrawl_lit": require("views/pubcrawl_lit"),
-            "items_grid": require("views/items_grid_view"),
-            "Atlas": require("views/atlas")
+            "items_grid": require("views/items_grid_view")
         },
         Lookups:{
             Labels:{}
@@ -77,7 +36,7 @@ $(function () {
     };
 
     qed.Display.fetch({
-        url:"svc/data/qed_display.json",
+        url:"svc/configuration/display.json",
         success:function () {
             document.title = (qed.Display.get("title") || "QED");
         }
@@ -91,7 +50,7 @@ $(function () {
                 var SessionsCollection = require("models/sessions");
                 qed.Sessions.All = new SessionsCollection(json.items);
 
-                var QEDRouter = require('lib/router');
+                var QEDRouter = require("./router");
                 qed.Router = new QEDRouter();
                 qed.Router.initTopNavBar();
 
@@ -102,7 +61,7 @@ $(function () {
     };
 
     qed.Datamodel.fetch({
-        url:"svc/data/qed_datamodel.json",
+        url:"svc/configuration/datamodel.json",
         success:function () {
             var section_ids = _.without(_.keys(qed.Datamodel.attributes), "url");
             var catalog_counts = _.map(section_ids, function (section_id) {

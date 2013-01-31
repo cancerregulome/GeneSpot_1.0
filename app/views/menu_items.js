@@ -1,13 +1,12 @@
-var View = require('./view');
-var LineItemTemplate = require("././line_item");
+var LineItemTemplate = require("../templates/line_item");
 
-module.exports = View.extend({
+module.exports = Backbone.View.extend({
 
     initialize:function (options) {
         _.extend(this, options);
         _.bindAll(this, "renderMenuItems");
 
-        this.model.on('load', this.renderMenuItems);
+        this.model.on("load", this.renderMenuItems);
     },
 
     renderMenuItems: function() {

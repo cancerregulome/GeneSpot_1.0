@@ -1,16 +1,14 @@
-var View = require("./view");
-var template = require("././data_menu_modal");
-var LineItemTemplate = require("././line_item");
+var Template = require("../templates/data_menu_modal");
+var LineItemTemplate = require("../templates/line_item");
 
-module.exports = View.extend({
-    template:template,
+module.exports = Backbone.View.extend({
 
     initialize:function (options) {
         _.extend(this, options);
         _.bindAll(this, "afterRender");
-    },
 
-    afterRender:function () {
+        $("body").append(Template());
+
         var sectionId = this.sectionId;
         var unitId = this.unitId;
         var itemId = this.itemId;

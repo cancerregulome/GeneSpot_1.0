@@ -1,24 +1,17 @@
-var View = require("./view");
-var template = require("././sign_in");
+var Template = require("../templates/sign_in");
 
-module.exports = View.extend({
-    template: template,
-    provider: {},
+module.exports = Backbone.View.extend({
 
     events: {
         "click .signout-link": "signout"
     },
 
-    initialize: function() {
+    initialize: function(options) {
+        _.extend(this, options);
         _.bindAll(this, "afterRender", "signout");
-        this.provider = _.extend({}, this.options.provider);
-    },
 
-    getRenderData: function() {
-        return this.provider;
-    },
+        this.$el.append(Template(this.provider));
 
-    afterRender: function() {
         if (this.provider.user && this.provider.user.pic) {
             this.$el.find(".user-pic").show();
         }

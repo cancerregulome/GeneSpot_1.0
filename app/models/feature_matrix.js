@@ -1,9 +1,4 @@
-var Model = require('./model');
-var REQUIRED = null;
-
-module.exports = Model.extend({
-    analysis_id:REQUIRED,
-    dataset_id:REQUIRED,
+module.exports = Backbone.Model.extend({
 
     initialize:function (options) {
         _.extend(this, options);
@@ -32,7 +27,7 @@ module.exports = Model.extend({
     },
 
     fetch:function (options) {
-        return Model.prototype.fetch.call(this, _.extend({}, options, {dataType:'text'}));
+        return Model.prototype.fetch.call(this, _.extend({}, options, {dataType:"text"}));
     }
 
 });
