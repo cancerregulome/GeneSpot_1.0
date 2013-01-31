@@ -34,21 +34,6 @@ module.exports = Backbone.Router.extend({
         });
     },
 
-    atlasView: function() {
-        var model = new qed.Models.Default({ "data_uri": "svc/data/qed_atlas.json" });
-        _.defer(function() {
-            model.fetch({
-                success: function() {
-                    model.trigger("load");
-                }
-            });
-        });
-
-        var AtlasView = qed.Views["Atlas"];
-        var view = new AtlasView({ "model": model });
-        this.$el.html(view.render().el);
-    },
-
     loadSessionById: function(sessionId) {
         if (!_.isEmpty(sessionId)) {
             var selectedSession = _.find(qed.Sessions.All.models, function(m) {
@@ -64,36 +49,6 @@ module.exports = Backbone.Router.extend({
         }
     },
     
-    mutsig_grid_view:function () {
-        var MutSigGrid = require("views/mutsig_grid_view");
-        var mutsigGridView = new MutSigGrid();
-        this.$el.html(mutsigGridView.render().el);
-    },
-
-    scatterplot_view:function () {
-        var Scatterplot = require("views/scatterplot_view");
-        var scatterplotView = new Scatterplot();
-        this.$el.html(scatterplotView.render().el);
-    },
-
-    seqpeek_view:function () {
-        var SeqPeek = require("views/seqpeek_view");
-        var seqpeekView = new SeqPeek();
-        this.$el.html(seqpeekView.render().el);
-    },
-
-    twod_view:function (label1, label2) {
-        var TwoD = qed.Views.twoD;
-        var FL = require("models/featureList");
-        var fl = new FL({
-            websvc:"/endpoints/filter_by_id?filepath=%2Ffeature_matrices%2F2012_09_18_0835__cons&IDs=",
-            feature_list:[label1, label2]
-        });
-        var twoDView = new TwoD({collection:fl});
-        fl.fetch();
-        this.$el.html(twoDView.render().el);
-    },
-
     home_view:function () {
         // TODO
     },
