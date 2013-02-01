@@ -14,7 +14,7 @@ rapid prototyping.
 > we will focus our testing efforts to the most commonly-used platforms: iOS and Android.
 
 # Build Dependencies #
-* NodeJS Package Manager (*npm*) - https://npmjs.org
+* NodeJS Package Manager (npm) - https://npmjs.org
 
 * Brunch - http://brunch.io/
 
