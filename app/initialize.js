@@ -42,20 +42,27 @@ $(function () {
         }
     });
 
+    var startRouter = function() {
+        var QEDRouter = require("./router");
+        qed.Router = new QEDRouter();
+        qed.Router.initTopNavBar();
+
+        Backbone.history.start();
+        qed.Events.trigger("ready");
+    };
+
     var startupUI = function() {
+        var SessionsCollection = require("models/sessions");
         $.ajax({
             "url": "svc/storage/sessions",
             "method": "GET",
-            "success": function(json) {
-                var SessionsCollection = require("models/sessions");
+            success: function(json) {
                 qed.Sessions.All = new SessionsCollection(json.items);
-
-                var QEDRouter = require("./router");
-                qed.Router = new QEDRouter();
-                qed.Router.initTopNavBar();
-
-                Backbone.history.start();
-                qed.Events.trigger("ready");
+                startRouter();
+            },
+            error: function() {
+                qed.Sessions.All = new SessionsCollection([]);
+                startRouter();
             }
         });
     };

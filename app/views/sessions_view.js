@@ -1,5 +1,5 @@
-var LineItemTemplate = require("./line_item");
-var SessionLabelTemplate = require("./sessions_label");
+var LineItemTemplate = require("../templates/line_item");
+var SessionLabelTemplate = require("../templates/sessions_label");
 
 module.exports = Backbone.View.extend({
 

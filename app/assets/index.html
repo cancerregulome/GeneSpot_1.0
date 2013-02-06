@@ -13,15 +13,15 @@
     <link rel="stylesheet" href="css/app.css">
     <script type="text/javascript" src="js/vendor.js"></script>
     <script type="text/javascript" src="js/app.js"></script>
+    <script type="text/javascript">
+        require("initialize");
+    </script>
 </head>
 <body>
     <div>
         <div class="navbar navbar-fixed-top" id="navigation-container"></div>
         <div class="container-fluid outer-container" id="mainDiv"></div>
     </div>
-
-    <script>require("initialize");</script>
-
     <!--these scripts are to support lightweight google hangout integration, should not affect how the app runs outside of hangout-->
     <script src="//hangoutsapi.talkgadget.google.com/talkgadget/apps/gadgets/js/rpc.js"></script>
     <script src="//hangoutsapi.talkgadget.google.com/hangouts/api/hangout.js?v=1.0"></script>
