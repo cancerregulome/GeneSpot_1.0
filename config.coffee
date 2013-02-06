@@ -19,20 +19,10 @@ exports.config =
           'vendor/js/d3.v2.js',
           'vendor/js/vq.js'
         ]
-        after: [
-          'vendor/js/d3.parcoords.js',
-          'vendor/js/slick.core.js',
-          'vendor/js/slick.grid.js',
-          'vendor/js/slick.rowselectionmodel.js'
-        ]
 
     stylesheets:
       defaultExtension: 'less'
       joinTo: 'css/app.css'
-      order:
-        after: [
-          'vendor/css/vis.css'
-        ]
 
     templates:
       defaultExtension: 'hbs'
@@ -40,14 +30,6 @@ exports.config =
 
   server:
     path: 'server.js'
-
-
-
-
-
-
-
-
     port: 3333
     run: yes
 
