@@ -8,7 +8,6 @@ exports.config =
       joinTo:
         'js/app.js': /^app/
         'js/vendor.js': /^vendor/
-        'js/isb.js': /^isb/
       order:
         before: [
           'vendor/js/console-helper.js',
@@ -17,11 +16,11 @@ exports.config =
           'vendor/js/underscore-1.4.2.js',
           'vendor/js/backbone-0.9.2.js',
           'vendor/js/backbone-mediator.js',
-          'isb/js/d3.v2.js',
-          'isb/js/vq.js'
+          'vendor/js/d3.v2.js',
+          'vendor/js/vq.js'
         ]
         after: [
-          'isb/js/d3.parcoords.js',
+          'vendor/js/d3.parcoords.js',
           'vendor/js/slick.core.js',
           'vendor/js/slick.grid.js',
           'vendor/js/slick.rowselectionmodel.js'
@@ -32,7 +31,7 @@ exports.config =
       joinTo: 'css/app.css'
       order:
         after: [
-          'isb/css/vis.css'
+          'vendor/css/vis.css'
         ]
 
     templates:
@@ -41,6 +40,14 @@ exports.config =
 
   server:
     path: 'server.js'
+
+
+
+
+
+
+
+
     port: 3333
     run: yes
 
