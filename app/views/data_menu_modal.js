@@ -5,9 +5,8 @@ module.exports = Backbone.View.extend({
 
     initialize:function (options) {
         _.extend(this, options);
-        _.bindAll(this, "afterRender");
 
-        $("body").append(Template());
+        this.$el.append(Template());
 
         var sectionId = this.sectionId;
         var unitId = this.unitId;

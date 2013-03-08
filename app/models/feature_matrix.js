@@ -27,7 +27,7 @@ module.exports = Backbone.Model.extend({
     },
 
     fetch:function (options) {
-        return Model.prototype.fetch.call(this, _.extend({}, options, {dataType:"text"}));
+        return Backbone.Model.prototype.fetch.call(this, _.extend({}, options, {dataType:"text"}));
     }
 
 });

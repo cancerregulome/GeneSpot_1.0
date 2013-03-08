@@ -8,7 +8,7 @@ module.exports = Backbone.View.extend({
 
     initialize: function(options) {
         _.extend(this, options);
-        _.bindAll(this, "afterRender", "signout");
+        _.bindAll(this, "signout");
 
         this.$el.append(Template(this.provider));
 
