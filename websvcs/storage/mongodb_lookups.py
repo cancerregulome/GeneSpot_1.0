@@ -14,6 +14,8 @@ class MongoDbLookupHandler(tornado.web.RequestHandler):
         ids = identity.split("/")
         db_name = ids[1]
         collection = self.open_collection(db_name, ids[2])
+        field_name = None
+        if len(ids) > 3: field_name = ids[3]
 
         # TODO : Improve this logic to correctly parse arguments and convert to a proper mongo DB query
         args = self.request.arguments
@@ -35,12 +37,17 @@ class MongoDbLookupHandler(tornado.web.RequestHandler):
 
         query_limit = options.mongo_lookup_query_limit
         json_items = []
-        for idx, item in enumerate(collection.find(query)):
-            if idx > query_limit:
-                break
 
-            json_item = self.jsonable_item(item)
-            json_items.append(json_item)
+        if field_name:
+            for idx, item in enumerate(collection.distinct(field_name)):
+                json_items.append(item)
+        else:
+            for idx, item in enumerate(collection.find(query)):
+                if idx > query_limit:
+                    break
+
+                json_item = self.jsonable_item(item)
+                json_items.append(json_item)
 
         if self.get_argument("output", "json") == "tsv":
             WriteTsv(self, json_items)
