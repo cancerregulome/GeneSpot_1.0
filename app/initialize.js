@@ -8,6 +8,7 @@ $(function () {
             "FeatureMatrix":require("models/featureMatrix2"),
             "FeatureMatrixFromTsv":require("models/featureMatrixFromTsv"),
             "FeatureMatrixAsTable":require("models/featureMatrix2asTable"),
+            "FeatureMatrixDataPoints":require("models/featureMatrixDataPoints"),
             "FeatureMatrix3":require("models/featureMatrix3"),
             "GraphLayouts":require("models/graph_layouts"),
             "Mutations":require("models/mutations_interpro"),
@@ -29,6 +30,10 @@ $(function () {
                 { "id":"xfeaturegrid", label:"Cross-Feature Summary" }
             ],
             "FeatureMatrixAsTable":[
+                { "id":"grid", label:"Grid" },
+                { "id":"stacksvis", label:"Stacks" }
+            ],
+            "FeatureMatrixDataPoints":[
                 { "id":"grid", label:"Grid" },
                 { "id":"stacksvis", label:"Stacks" }
             ],

@@ -307,8 +307,12 @@ module.exports = Backbone.View.extend({
     loadCancerList: function(txt) {
         var cancerList = txt.trim().split("\n");
         var UL = this.$el.find(".cancer-selector");
-        _.each(cancerList, function(cancer) {
-            UL.append(LineItemTemplate({"li_class":"active","a_class":"toggle-active","id":cancer,"label":cancer}));
+        _.each(cancerList, function(cancer, idx) {
+            if (idx == 0) {
+                UL.append(LineItemTemplate({"li_class":"active","a_class":"toggle-active","id":cancer,"label":cancer}));
+            } else {
+                UL.append(LineItemTemplate({"a_class":"toggle-active","id":cancer,"label":cancer}));
+            }
         });
 
         UL.find(".toggle-active").click(function(e) {

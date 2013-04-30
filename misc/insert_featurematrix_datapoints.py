@@ -5,23 +5,29 @@ import pymongo
 import sys
 
 
-def feature_id_extract(feature):
+def feature_id_extract(feature, tumor_type):
     feature_parts = feature.split(":")
-    source = feature_parts[1].lower()
+    source = feature_parts[1]
+
+    ret = {
+        "id": feature,
+        "type": feature_parts[0],
+        "source": source,
+        "label": feature_parts[2],
+        "modifier": feature_parts[7]
+    }
 
     if "chr" in feature_parts[3]:
         start = feature_parts[4]
         end = feature_parts[5]
-        if not start:
-            start = -1
-        if not end:
-            end = -1
+        if not start: start = -1
+        if not end: end = -1
 
-        return {
+        ret = {
             "id": feature,
             "type": feature_parts[0],
             "source": source,
-            "gene": feature_parts[2].lower(),
+            "gene": feature_parts[2],
             "label": feature_parts[2],
             "chr": feature_parts[3][3:],
             "start": int(start),
@@ -30,13 +36,10 @@ def feature_id_extract(feature):
             "modifier": feature_parts[7]
         }
 
-    return {
-        "id": feature,
-        "type": feature_parts[0],
-        "source": source,
-        "label": feature_parts[2],
-        "modifier": feature_parts[7]
-    }
+    if tumor_type:
+        ret["cancer"] = tumor_type
+
+    return ret
 
 def build_value_dict_categorical(ids, values):
     result = {}
@@ -53,7 +56,7 @@ def build_value_dict_numerical(ids, values):
             result[i] = float(v)
     return result
 
-def iterate_features(descriptor):
+def iterate_features(descriptor, tumor_type):
     file_path = descriptor['path']
     with open(file_path, 'rb') as csvfile:
         csvreader = csv.reader(csvfile, delimiter='\t')
@@ -67,7 +70,7 @@ def iterate_features(descriptor):
 
         for row in csvreader:
             feature_id = row[0]
-            cell_tpl = feature_id_extract(feature_id)
+            cell_tpl = feature_id_extract(feature_id, tumor_type)
 
             values = row[1:]
             if len(values) != len(ids):
@@ -102,13 +105,14 @@ def main():
     parser.add_argument('--port', required=True, type=int, help='Port')
     parser.add_argument('--db', required=True, help='Database name')
     parser.add_argument('--collection', required=True, help='Collection name')
+    parser.add_argument('--tumor_type', default=None, help='Tumor Type')
     args = parser.parse_args()
 
     conn = pymongo.Connection(args.host, args.port)
     collection = conn[args.db][args.collection]
 
     print "args.fmx=%s" % args.fmx
-    for feature_object in iterate_features({ "path": args.fmx }):
+    for feature_object in iterate_features({ "path": args.fmx }, args.tumor_type):
         collection.insert(feature_object)
     conn.close()
 
