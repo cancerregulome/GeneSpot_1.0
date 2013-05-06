@@ -176,8 +176,9 @@ module.exports = Backbone.View.extend({
         });
         splitiscope.data(data_array);
         splitiscope.render();
+        this.prepareDownloadLink(_.pluck(data_array, "id"), data_array);
 
-        var downloadEl = this.$el.find(".download-container").empty();
+        var _this = this;
         splitiscope.on("partition", function (partition) {
             var sample_ids = [];
             _.each(partition, function (part, key) {
@@ -194,28 +195,33 @@ module.exports = Backbone.View.extend({
                 }
             });
 
-            if (!_.isEmpty(sample_ids)) {
-                var keys = _.without(_.keys(_.first(data_array)), "id");
+            _this.prepareDownloadLink(sample_ids, data_array);
+        });
+    },
 
-                var filecontents = [];
-                filecontents.push("ID" + "%09" + keys.join("%09"));
+    prepareDownloadLink: function(sample_ids, data_array) {
+        var downloadEl = this.$el.find(".download-container").empty();
+        if (_.isEmpty(sample_ids)) return;
 
-                _.each(data_array, function(item) {
-                    if (sample_ids.indexOf(item.id) >= 0) {
-                        var values = _.map(keys, function(key) {
-                            return item[key];
-                        });
-                        filecontents.push(item.id + "%09" + values.join("%09"));
-                    }
+        var keys = _.without(_.keys(_.first(data_array)), "id");
+
+        var filecontents = [];
+        filecontents.push("ID" + "%09" + keys.join("%09"));
+
+        _.each(data_array, function(item) {
+            if (sample_ids.indexOf(item.id) >= 0) {
+                var values = _.map(keys, function(key) {
+                    return item[key];
                 });
-
-                downloadEl.html(DataUriTemplate({
-                    "filename": "genespot_selected_samples.tsv",
-                    "content": filecontents.join("%0A"),
-                    "label": "Download " + sample_ids.length + " Samples"
-                }));
+                filecontents.push(item.id + "%09" + values.join("%09"));
             }
         });
+
+        downloadEl.html(DataUriTemplate({
+            "filename": "genespot_selected_samples.tsv",
+            "content": filecontents.join("%0A"),
+            "label": "Download " + sample_ids.length + " Samples"
+        }));
     },
 
     selectedFeatureData: function () {
