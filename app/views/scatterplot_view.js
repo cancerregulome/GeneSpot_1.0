@@ -222,17 +222,17 @@ module.exports = Backbone.View.extend({
         var downloadEl = this.$el.find(".download-container").empty();
         if (_.isEmpty(sample_ids)) return;
 
-        var keys = _.without(_.keys(_.first(data_array)), "id");
+        var keys = _.without(_.without(_.keys(_.first(data_array)), "id"), "cancer");
 
         var filecontents = [];
-        filecontents.push("ID" + "%09" + keys.join("%09"));
+        filecontents.push("ID" + "%09" + "TUMOR_TYPE" + "%09" + keys.join("%09"));
 
         _.each(data_array, function(item) {
             if (sample_ids.indexOf(item.id) >= 0) {
                 var values = _.map(keys, function(key) {
                     return item[key];
                 });
-                filecontents.push(item.id + "%09" + values.join("%09"));
+                filecontents.push(item.id + "%09" + item.cancer.toUpperCase() + "%09" + values.join("%09"));
             }
         });
 
