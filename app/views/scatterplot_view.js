@@ -121,25 +121,16 @@ module.exports = Backbone.View.extend({
 
             var selected_gene = this.selected_genes[axis];
             var selected_cancers = this.selected_tumor_types;
-            var selected_features = _.filter(this.model.get("items"), function (feature) {
-                return (feature.id.indexOf(selected_gene) >= 0) && selected_cancers.indexOf(feature.cancer.toUpperCase()) >= 0;
-            });
-            var features_by_source_by_id = {};
-            _.each(_.groupBy(selected_features, "source"), function(features, source) {
-                if (!_.has(features_by_source_by_id, source)) features_by_source_by_id[source] = {};
+            var selected_feature_ids = _.uniq(_.compact(_.map(this.model.get("items"), function (feature) {
+                if (feature.id.indexOf(selected_gene) >= 0 && selected_cancers.indexOf(feature.cancer.toUpperCase()) >= 0) return feature.id;
+                return null;
+            })));
 
-                _.each(features, function(feature) {
-                    features_by_source_by_id[source][feature.id] = feature;
-                });
-            });
-            var unique_features_by_source = {};
-            _.each(features_by_source_by_id, function(features, source) {
-                unique_features_by_source[source] = [];
-                _.each(features, function(feature, id) {
-                    unique_features_by_source[source].push(feature);
-                });
-            });
-            _.each(unique_features_by_source, function(features, source) {
+            var selected_features = _.map(selected_feature_ids, function(selected_feature_id) {
+                return _.first(this.feature_map[selected_feature_id]);
+            }, this);
+
+            _.each(_.groupBy(selected_features, "source"), function (features, source) {
                 if (features.length == 1) {
                     var feature = _.first(features);
                     var label = (feature.modifier) ? " (" + feature.modifier + ")": "";
