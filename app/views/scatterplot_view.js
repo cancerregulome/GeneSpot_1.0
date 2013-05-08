@@ -285,21 +285,23 @@ module.exports = Backbone.View.extend({
         var y_features_by_tumor_type = _.groupBy(y_features, "cancer");
 
         var all_datapoints = _.map(x_features_by_tumor_type, function(x_feats, tumor_type) {
-            var x_values = _.first(x_feats).values || {};
-            var y_values = _.first(y_features_by_tumor_type[tumor_type]).values || {};
-            var datapoints = _.map(x_values, function (x_val, point_id) {
-                var y_val = y_values[point_id];
+            if (this.selected_tumor_types.indexOf(tumor_type.toUpperCase()) >= 0) {
+                var x_values = _.first(x_feats).values || {};
+                var y_values = _.first(y_features_by_tumor_type[tumor_type]).values || {};
+                return _.compact(_.map(x_values, function (x_val, point_id) {
+                    var y_val = y_values[point_id];
 
-                if (!_.isEqual(x_val, "NA") && !_.isEqual(y_val, "NA")) {
-                    var dataPoint = {"id": point_id};
-                    dataPoint[x_feature] = x_val;
-                    dataPoint[y_feature] = y_val;
-                    dataPoint["cancer"] = tumor_type;
-                    return dataPoint;
-                }
-            });
-            return _.compact(datapoints);
-        });
+                    if (!_.isEqual(x_val, "NA") && !_.isEqual(y_val, "NA")) {
+                        var dataPoint = {"id": point_id};
+                        dataPoint[x_feature] = x_val;
+                        dataPoint[y_feature] = y_val;
+                        dataPoint["cancer"] = tumor_type;
+                        return dataPoint;
+                    }
+                }));
+            }
+            return null;
+        }, this);
         return _.compact(_.flatten(all_datapoints));
     },
 
