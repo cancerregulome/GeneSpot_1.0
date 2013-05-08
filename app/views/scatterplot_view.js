@@ -164,13 +164,14 @@ module.exports = Backbone.View.extend({
             _.each(_.groupBy(selected_features, "source"), function (features, source) {
                 if (features.length == 1) {
                     var feature = _.first(features);
-                    var label = (feature.modifier) ? " (" + feature.modifier + ")": "";
-                    UL.append(LineItemTemplate({ "label": source.toUpperCase() + label, "id": feature.id, "a_class": "selector" }));
+                    var label = feature.modifier || "chr" + feature.chr + ":" + feature.start + ":" + feature.end + ":" + feature.strand;
+                    UL.append(LineItemTemplate({ "label": source.toUpperCase() + ": " + label, "id": feature.id, "a_class": "selector" }));
                 }
                 if (features.length > 1) {
                     UL.append(source.toUpperCase());
                     _.each(features, function(feature) {
-                        UL.append(LineItemTemplate({ "label": "- " + feature.modifier, "id": feature.id, "a_class": "selector" }));
+                        var label = feature.modifier || "chr" + feature.chr + ":" + feature.start + ":" + feature.end + ":" + feature.strand;
+                        UL.append(LineItemTemplate({ "label": "- " + label, "id": feature.id, "a_class": "selector" }));
                     });
                 }
             });
