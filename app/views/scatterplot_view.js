@@ -80,7 +80,7 @@ module.exports = Backbone.View.extend({
             _this.selected_tumor_types = _.map(_this.$el.find(".cancer-selector-scatterplot").find(".active").find(".toggle-active"), function(liactive) {
                 return $(liactive).data("id");
             });
-            _.defer(_this.reloadModel);
+            _.defer(_this.loadData);
         });
     },
 
@@ -119,9 +119,11 @@ module.exports = Backbone.View.extend({
     },
 
     loadData: function () {
+        this.$el.find(".scatterplot-container").html("Loading data...");
+        this.$el.find(".download-container").empty();
         this.feature_map = _.groupBy(this.model.get("items"), "id");
-        this.initFeatureLabelSelector();
-        this.drawGraph();
+        _.defer(this.initFeatureLabelSelector);
+        _.defer(this.drawGraph);
     },
 
     reloadModel: function () {
@@ -188,7 +190,10 @@ module.exports = Backbone.View.extend({
         this.$el.find(".scatterplot-container").empty();
 
         var data_array = this.selectedFeatureData();
-        if (_.isEmpty(data_array)) return;
+        if (_.isEmpty(data_array)) {
+            _.defer(this.reloadModel);
+            return;
+        }
 
         var splitiscope = Splitiscope({
             "radius": 8,
