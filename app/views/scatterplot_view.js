@@ -176,11 +176,18 @@ module.exports = Backbone.View.extend({
             });
 
             if (!_.isEmpty(selected_features)) {
-                this.selected_features[axis] = _.first(selected_features).id;
+                var feature_id = _.first(selected_features).id;
+                this.selected_features[axis] = feature_id;
+                var firstEl = _.find(UL.find("a"), function(link) {
+                    return _.isEqual($(link).data("id"), feature_id);
+                });
+                $(firstEl).parent().addClass("active");
             }
 
             var _this = this;
             UL.find(".selector").click(function (e) {
+                UL.find(".active").removeClass("active");
+                $(e.target).parent().addClass("active");
                 _this.selected_features[axis] = $(e.target).data("id");
                 _this.drawGraph();
             });
