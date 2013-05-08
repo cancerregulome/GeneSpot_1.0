@@ -6,6 +6,7 @@ module.exports = Backbone.View.extend({
     selected_tumor_types: [],
     selected_genes: { "x": "TP53", "y": "KRAS" },
     selected_features: { "x": null, "y": null },
+    colorsByTumorType: {},
 
     events: {
         "click .hide-controls": function() {
@@ -31,10 +32,30 @@ module.exports = Backbone.View.extend({
             $.ajax({ url: "svc/data/lookups/cancers", type: "GET", dataType: "text", success: this.initCancerSelector });
         } else {
             this.selected_tumor_types = this.cancers;
+            this.initColorMaps();
             this.initCancerSelector(this.cancers.join("\n"));
         }
 
         this.model.on("load", this.loadData);
+    },
+
+    initColorMaps: function() {
+        if (qed.Display) {
+            var colormaps = qed.Display.get("colormaps") || {};
+            if (_.has(colormaps, "tumor_types")) {
+                this.colorsByTumorType = colormaps["tumor_types"];
+                return;
+            }
+        }
+
+        var colorscaleFn = d3.scale.ordinal().domain(this.selected_tumor_types)
+            .range(d3.range(this.selected_tumor_types.length)
+            .map(d3.scale.linear().domain([0, this.selected_tumor_types.length - 1])
+            .range(["red", "green"])
+            .interpolate(d3.interpolateLab)));
+        _.each(this.selected_tumor_types, function(tumor_type) {
+            this.colorsByTumorType[tumor_type] = colorscaleFn(tumor_type);
+        }, this);
     },
 
     initCancerSelector: function (txt) {
@@ -49,9 +70,16 @@ module.exports = Backbone.View.extend({
             }
         }, this);
 
+        _.each(this.$el.find(".cancer-selector-scatterplot").find(".toggle-active"), function(liactive) {
+            $(liactive).css({
+                "border-bottom": "10px solid " + this.colorsByTumorType[$(liactive).data("id")]
+            });
+        }, this);
         this.$el.find(".cancer-selector-scatterplot").find(".toggle-active").click(function (e) {
             $(e.target).parent().toggleClass("active");
-            _this.selected_tumor_types = _this.$el.find(".cancer-selector-scatterplot").find(".active").find(".toggle-active").data("id");
+            _this.selected_tumor_types = _.map(_this.$el.find(".cancer-selector-scatterplot").find(".active").find(".toggle-active"), function(liactive) {
+                return $(liactive).data("id");
+            });
             _.defer(_this.reloadModel);
         });
     },
@@ -168,11 +196,16 @@ module.exports = Backbone.View.extend({
                 "top": 10, "left": 10, "bottom": 30, "right": 40
             }
         })(_.first(this.$el.find(".scatterplot-container")));
-        splitiscope.class({
+        splitiscope.colorBy({
             "label": "cancer",
             "list": _.map(this.selected_tumor_types, function(tumor_type) {
                 return tumor_type.toLowerCase()
-            })
+            }),
+            "color": _.values(this.colorsByTumorType)
+        });
+        var _this = this;
+        splitiscope.colorFn(function(categoryValue) {
+            return _this.colorsByTumorType[categoryValue.toUpperCase()];
         });
         splitiscope.axes({
             "attr": {
