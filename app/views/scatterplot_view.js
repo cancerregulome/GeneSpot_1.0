@@ -135,6 +135,10 @@ module.exports = Backbone.View.extend({
     },
 
     reloadModel: function () {
+        this.$el.find(".download-container").empty();
+        this.$el.find(".feature-selector-x").empty();
+        this.$el.find(".feature-selector-y").empty();
+
         if (_.isEmpty(this.selected_tumor_types)) return;
         if (!this.selected_genes["x"]) return;
         if (!this.selected_genes["y"]) return;
@@ -154,8 +158,7 @@ module.exports = Backbone.View.extend({
 
     initFeatureLabelSelector: function () {
         _.each(["x", "y"], function (axis) {
-            var UL = this.$el.find(".feature-selector-" + axis);
-            UL.empty();
+            var UL = this.$el.find(".feature-selector-" + axis).empty();
 
             var selected_gene = this.selected_genes[axis];
             var selected_cancers = this.selected_tumor_types;
