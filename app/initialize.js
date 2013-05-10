@@ -83,8 +83,14 @@ $(function () {
         }
     };
 
+    var datamodelUri = "overrides/data/qed_datamodel.json";
+    var displayUri = "overrides/data/qed_display.json";
+
+    $.ajax({ "url": datamodelUri, "async": false, "error": function() { datamodelUri = "svc/data/qed_datamodel.json"; } });
+    $.ajax({ "url": displayUri, "async": false, "error": function() { displayUri = "svc/data/qed_display.json"; } });
+
     qed.Display.fetch({
-        url:"svc/data/qed_display.json",
+        url:displayUri,
         success:function () {
             document.title = (qed.Display.get("title") || "QED");
         }
@@ -109,7 +115,7 @@ $(function () {
     };
 
     qed.Datamodel.fetch({
-        url:"svc/data/qed_datamodel.json",
+        url: datamodelUri,
         success:function () {
             var section_ids = _.without(_.keys(qed.Datamodel.attributes), "url");
             var catalog_counts = _.map(section_ids, function (section_id) {
