@@ -211,6 +211,29 @@ module.exports = Backbone.View.extend({
         this.splitiscope.colorFn(function (categoryValue) {
             return _this.colorsByTumorType[categoryValue.toUpperCase()];
         });
+        this.splitiscope.colorBy({
+            "label": "cancer",
+            "list": _.keys(this.colorsByTumorType),
+            "color": _.values(this.colorsByTumorType)
+        });
+        console.log("initGraph:splitiscope ready");
+    },
+
+    drawGraph: function () {
+        var data_array = this.selectedFeatureData();
+
+        var _this = this;
+        this.splitiscope.axes({
+            "attr": {
+                "x": this.selected_features["x"],
+                "y": this.selected_features["y"]
+            },
+            "labels": {
+                "x": this.getFeatureAxisLabel("x"),
+                "y": this.getFeatureAxisLabel("y")
+            }
+        });
+        this.splitiscope.data(data_array);
         this.splitiscope.on("partition", function (partition) {
             var sample_ids = [];
             _.each(partition, function (part, key) {
@@ -229,28 +252,6 @@ module.exports = Backbone.View.extend({
 
             _this.prepareDownloadLink(sample_ids, data_array);
         });
-        this.splitiscope.colorBy({
-            "label": "cancer",
-            "list": _.keys(this.colorsByTumorType),
-            "color": _.values(this.colorsByTumorType)
-        });
-        console.log("initGraph:splitiscope ready");
-    },
-
-    drawGraph: function () {
-        var data_array = this.selectedFeatureData();
-
-        this.splitiscope.axes({
-            "attr": {
-                "x": this.selected_features["x"],
-                "y": this.selected_features["y"]
-            },
-            "labels": {
-                "x": this.getFeatureAxisLabel("x"),
-                "y": this.getFeatureAxisLabel("y")
-            }
-        });
-        this.splitiscope.data(data_array);
 
         console.log("drawGraph: rendering: " + data_array.length);
         this.splitiscope.render();
