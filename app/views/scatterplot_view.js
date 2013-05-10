@@ -240,7 +240,7 @@ module.exports = Backbone.View.extend({
                 "y": this.getFeatureAxisLabel("y")
             }
         });
-        this.splitiscope.data(data_array);
+        this.splitiscope.data(data_array).render();
         this.splitiscope.on("partitioncomplete", function (partition) {
             var sample_ids = [];
             _.each(partition, function (part, key) {
@@ -260,9 +260,9 @@ module.exports = Backbone.View.extend({
             _this.prepareDownloadLink(sample_ids, data_array);
         });
 
-        console.log("drawGraph: rendering: " + data_array.length);
-        this.splitiscope.render();
-        this.prepareDownloadLink(_.pluck(data_array, "id"), data_array);
+        _.defer(function() {
+            _this.prepareDownloadLink(_.pluck(data_array, "id"), data_array);
+        });
     },
 
     prepareDownloadLink: function (sample_ids, data_array) {
