@@ -86,10 +86,10 @@ module.exports = Backbone.View.extend({
         });
         this.$el.find(".cancer-selector-scatterplot").find(".toggle-active").hover(function (e) {
             if ($(e.target).parent().hasClass("active")) {
-                _this.splitiscope.highlight($(e.target).data("id")).render();
+                _this.carve.highlight($(e.target).data("id")).render();
             }
         }, function(e) {
-            _this.splitiscope.highlight("").render();
+            _this.carve.highlight("").render();
         });
     },
 
@@ -206,22 +206,22 @@ module.exports = Backbone.View.extend({
     },
 
     initGraph: function () {
-        if (this.splitiscope) return;
+        if (this.carve) return;
 
         console.log("initGraph:splitiscope init");
 
         var _this = this;
 
-        this.splitiscope = Splitiscope({
+        this.carve = carve({
             "radius": 8,
             "margin": {
                 "top": 10, "left": 10, "bottom": 30, "right": 40
             }
         })(_.first(this.$el.find(".scatterplot-container")));
-        this.splitiscope.colorFn(function (categoryValue) {
+        this.carve.colorFn(function (categoryValue) {
             return _this.colorsByTumorType[categoryValue.toUpperCase()];
         });
-        this.splitiscope.colorBy({
+        this.carve.colorBy({
             "label": "cancer",
             "list": _.keys(this.colorsByTumorType),
             "colors": _.values(this.colorsByTumorType)
@@ -233,7 +233,7 @@ module.exports = Backbone.View.extend({
         var data_array = this.selectedFeatureData();
 
         var _this = this;
-        this.splitiscope.axes({
+        this.carve.axes({
             "attr": {
                 "x": this.selected_features["x"],
                 "y": this.selected_features["y"]
@@ -243,8 +243,8 @@ module.exports = Backbone.View.extend({
                 "y": this.getFeatureAxisLabel("y")
             }
         });
-        this.splitiscope.data(data_array).render();
-        this.splitiscope.on("partitioncomplete", function (partition) {
+        this.carve.data(data_array).render();
+        this.carve.on("partitioncomplete", function (partition) {
             var sample_ids = [];
             _.each(partition, function (part, key) {
                 var part_samples = _.compact(_.map(data_array, function (item) {
