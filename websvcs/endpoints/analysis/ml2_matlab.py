@@ -75,23 +75,14 @@ def parseAnnotations(filepath):
 class ML2Analysis(tornado.web.RequestHandler):
     def validateQuery(self, params):
         result = dict()
-        
+
         try:
             # Cutoff must be a float
             cutoff = float(params['cutoff'])
-            
-            if 'genes' not in params:
-                raise Exception("Invalid parameters", params)
-            
+
             if 'groups' not in params:
                 raise Exception("Invalid parameters", params)
-            
-            if 'pathways' not in params:
-                raise Exception("Invalid parameters", params)
-            
-            if 'hallmarks' not in params:
-                raise Exception("Invalid parameters", params)
-            
+
         except Exception as e:
             raise Exception("Invalid parameters", params)
 
@@ -100,27 +91,30 @@ class ML2Analysis(tornado.web.RequestHandler):
         for group in params['groups']:
             row_data = ['GROUP', group['id']]
             row_data.extend(group['samples'])
-            
+
             outfile.write('\t'.join(row_data) + '\n')
-    
+
         # Cutoff value
         outfile.write('\t'.join(['CUTOFF', str(params['cutoff'])]) + '\n')
-        
-        # Genes
-        gene_row = ['GENES']
-        gene_row.extend(params['genes'])
-        outfile.write('\t'.join(gene_row) + '\n')
-        
-        # Pathways
-        pathway_row = ['PATHWAYS']
-        pathway_row.extend(params['pathways'])
-        outfile.write('\t'.join(pathway_row) + '\n')
-        
-        # Hallmarks
-        hallmark_row = ['HALLMARKS']
-        hallmark_row.extend(params['hallmarks'])
-        outfile.write('\t'.join(hallmark_row) + '\n')
-    
+
+        # Genes - optional
+        if 'genes' in params:
+            gene_row = ['GENES']
+            gene_row.extend(params['genes'])
+            outfile.write('\t'.join(gene_row) + '\n')
+
+        # Pathways - optional
+        if 'pathways' in params:
+            pathway_row = ['PATHWAYS']
+            pathway_row.extend(params['pathways'])
+            outfile.write('\t'.join(pathway_row) + '\n')
+
+        # Hallmarks - optional
+        if 'hallmarks' in params:
+            hallmark_row = ['HALLMARKS']
+            hallmark_row.extend(params['hallmarks'])
+            outfile.write('\t'.join(hallmark_row) + '\n')
+
 
     def runAnalysis(self, matlab_exe, script_path, input_params, result_obj):
         # Create needed temporary files.
@@ -164,13 +158,13 @@ class ML2Analysis(tornado.web.RequestHandler):
             matlab_function_parameters = []
             for p in [preset_input_path, input_path, nodes_out_path, edges_out_path, annotations_out_path]:
                 matlab_function_parameters.append("'" + p + "'")
-            
+
             matlab_cmd = ['cd(\'' + script_dir + '\')']
             matlab_cmd.append(matlab_function + '(' + ','.join(matlab_function_parameters) + ')')
-            
+
             cmdline = [matlab_exe, '-nosplash', '-nodisplay', '-r', '; '.join(matlab_cmd)]
             retval = subprocess.call(cmdline, shell=False)
-            
+
             result_obj["edges"] = parseEdges(edges_out_path)
             result_obj["nodes"] = parseNodes(nodes_out_path)
             result_obj["annotations"] = parseAnnotations(annotations_out_path)
