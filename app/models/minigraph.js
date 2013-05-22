@@ -61,6 +61,32 @@ var GroupsModel = Backbone.Model.extend({
     }
 });
 
+var BasicModel = Backbone.Model.extend({
+    parse: function (text) {
+        var rows = d3.tsv.parseRows(text);
+
+        return {
+            items:
+                _.chain(rows)
+                   .map(function(row) {
+                        return row[0].trim();
+                    })
+                    .filter(function(row) {
+                        return row.length > 0;
+                    })
+                    .value()
+        }
+    },
+
+    fetch: function (options) {
+        var params = _.extend({
+            dataType: "text"
+        }, options);
+
+        return Backbone.Model.prototype.fetch.call(this, params);
+    }
+});
+
 var ML2AnalysisModel = Backbone.Model.extend({
     url: function () {
         return "svc/ML2";
@@ -94,6 +120,10 @@ module.exports = Backbone.Model.extend({
     initialize: function() {
         this.set("analysis", new ML2AnalysisModel());
         this.set("groups", new GroupsModel());
+
+        this.set("genes", new BasicModel());
+        this.set("pathways", new BasicModel());
+        this.set("hallmarks", new BasicModel());
     },
 
     url: function () {
@@ -113,11 +143,37 @@ module.exports = Backbone.Model.extend({
     },
 
     fetchStatic: function() {
+        var base_uri = "svc/data/domains/" + this.get("analysis_id") + '/' + this.get("dataset_id") + '/';
+
         this.get("groups").fetch({
-            url: "svc/data/domains/" + this.get("analysis_id") + '/' + this.get("dataset_id") + '/' + this.get("catalog_unit")['preset_groups'],
+            url: base_uri + this.get("catalog_unit")['preset_groups'],
             async: true,
             success: function() {
                 console.log("Groups loaded");
+            }
+        });
+
+        this.get("genes").fetch({
+            url: base_uri + this.get("catalog_unit")['genes'],
+            async: true,
+            success: function(res) {
+                console.log("Genes loaded");
+            }
+        });
+
+        this.get("pathways").fetch({
+            url: base_uri + this.get("catalog_unit")['pathways'],
+            async: true,
+            success: function(res) {
+                console.log("Pathways loaded");
+            }
+        });
+
+        this.get("hallmarks").fetch({
+            url: base_uri + this.get("catalog_unit")['hallmarks'],
+            async: true,
+            success: function(res) {
+                console.log("Hallmarks loaded");
             }
         });
     },
