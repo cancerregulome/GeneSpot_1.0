@@ -32,10 +32,24 @@ module.exports = Backbone.View.extend({
     },
 
     initialize: function () {
-        _.bindAll(this, "initGroupSelector", "initHandlers", "renderData", "renderUI");
+        _.bindAll(this, "initGroupSelector", "initTypeahead", "initHandlers", "renderData", "renderUI");
+
+        var _this = this;
 
         this.model.get("groups").on("change", this.initGroupSelector);
         this.model.get("analysis").on("change", this.renderData);
+
+        this.model.get("genes").on("change", function(model) {
+            _this.initTypeahead(model, ".genes-typeahead", ".gene-selector");
+        });
+
+        this.model.get("pathways").on("change", function(model) {
+            _this.initTypeahead(model, ".pathways-typeahead", ".pathway-selector");
+        });
+
+        this.model.get("hallmarks").on("change", function(model) {
+            _this.initTypeahead(model, ".hallmarks-typeahead", ".hallmark-selector");
+        });
 
         this.renderUI();
 
@@ -100,11 +114,61 @@ module.exports = Backbone.View.extend({
                 return;
             }
 
-            _this.model.doAnalysis({
+            var afn = function(link) {
+                return $(link).data("id")
+            };
+
+            var genes = _.map(_this.$el.find(".gene-selector .item-remover"), afn),
+                pathways = _.map(_this.$el.find(".pathway-selector .item-remover"), afn),
+                hallmarks = _.map(_this.$el.find(".hallmark-selector .item-remover"), afn);
+
+            var analysis_params = {
                 cutoff: cutoff,
                 groups: groups_param
-            });
+            };
+
+            if (genes.length > 0) {
+                analysis_params.genes = genes;
+            }
+            if (pathways.length > 0) {
+                analysis_params.pathways = pathways;
+            }
+            if (hallmarks.length > 0) {
+                analysis_params.hallmarks = hallmarks;
+            }
+
+            _this.model.doAnalysis(analysis_params);
         })
+    },
+
+    initTypeahead: function(model, typeahead_selector, dropdown_selector) {
+        var itemlist = model.get("items");
+
+        var UL = this.$el.find(dropdown_selector);
+        this.$el.find(typeahead_selector).typeahead({
+            source:function (q, p) {
+                p(_.compact(_.flatten(_.map(q.toLowerCase().split(" "), function (qi) {
+                    return _.map(itemlist, function (item) {
+                        if (item.toLowerCase().indexOf(qi) >= 0) return item;
+                    });
+                }))));
+            },
+
+            updater:function (line_item) {
+                UL.append(LineItemTemplate({ "label": line_item, "id": line_item, "a_class":"item-remover", "i_class":"icon-trash" }));
+                UL.find(".item-remover").click(function(e) {
+                    $(e.target).parent().remove();
+                });
+                return "";
+            }
+        });
+
+
+        UL.find(".item-remover").click(function(e) {
+            $(e.target).parent().remove();
+        });
+
+        UL.sortable();
     },
 
     processVerticalLocations: function(nodes) {
