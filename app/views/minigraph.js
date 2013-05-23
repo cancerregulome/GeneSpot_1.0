@@ -1,6 +1,8 @@
 var Template = require("../templates/minigraph");
 var DataTemplate = require("./templates/minigraph_data");
+var GroupConstructTemplate = require("./templates/minigraph_groups");
 var LineItemTemplate = require("./templates/line_item");
+var GroupGeneLineTemplate = require("./templates/minigraph_gene_row_item");
 
 module.exports = Backbone.View.extend({
     selected_groups: [],
@@ -32,15 +34,20 @@ module.exports = Backbone.View.extend({
     },
 
     initialize: function () {
-        _.bindAll(this, "initGroupSelector", "initTypeahead", "initHandlers", "renderData", "renderUI");
+        _.bindAll(this, "initGroupSelector", "initTypeahead", "initGroupGeneTypeahead", "initHandlers", "renderData", "renderUI");
 
         var _this = this;
 
-        this.model.get("groups").on("change", this.initGroupSelector);
+        this.model.get("groups").on("change", function(model) {
+            _this.initGroupSelector(model, ".preset-group-selector-minigraph");
+            _this.initGroupSelector(model, ".group-construct-cancer-selector");
+        });
+
         this.model.get("analysis").on("change", this.renderData);
 
         this.model.get("genes").on("change", function(model) {
             _this.initTypeahead(model, ".genes-typeahead", ".gene-selector");
+            _this.initGroupGeneTypeahead(model, ".group-genes-typeahead", ".group-gene-selector");
         });
 
         this.model.get("pathways").on("change", function(model) {
@@ -57,34 +64,36 @@ module.exports = Backbone.View.extend({
         $(window).on("resize", jsPlumb.repaintEverything);
     },
 
-    initGroupSelector: function (groups_model) {
+    initGroupSelector: function (groups_model, element_selector) {
         var _this = this;
 
         var group_names = _.map(groups_model.get("items"), function(group_data, id) {
-                return id;
-            });
+            return id;
+        });
+
+        var $el = this.$el.find(element_selector);
 
         _.each(group_names, function (group, idx) {
             group = group.trim();
             if (this.selected_groups.indexOf(group) >= 0) {
-                _this.$el.find(".cancer-selector-minigraph").append(LineItemTemplate({"li_class": "active", "a_class": "toggle-active", "id": group, "label": group}));
+                $el.append(LineItemTemplate({"li_class": "active", "a_class": "toggle-active", "id": group, "label": group}));
             } else {
-                _this.$el.find(".cancer-selector-minigraph").append(LineItemTemplate({"a_class": "toggle-active", "id": group, "label": group}));
+                $el.append(LineItemTemplate({"a_class": "toggle-active", "id": group, "label": group}));
             }
         }, this);
 
-        _.each(this.$el.find(".cancer-selector-minigraph").find(".toggle-active"), function(liactive) {
+        _.each($el.find(".toggle-active"), function(liactive) {
             $(liactive).css({
                 "border-bottom": "10px solid "
             });
         }, this);
-        this.$el.find(".cancer-selector-minigraph").find(".toggle-active").click(function (e) {
+        $el.find(".toggle-active").click(function (e) {
             $(e.target).parent().toggleClass("active");
-            _this.selected_groups = _.map(_this.$el.find(".cancer-selector-minigraph").find(".active").find(".toggle-active"), function(liactive) {
+            _this.selected_groups = _.map($el.find(".active").find(".toggle-active"), function(liactive) {
                 return $(liactive).data("id");
             });
         });
-        this.$el.find(".cancer-selector-minigraph").find(".toggle-active").hover(function (e) {
+        $el.find(".toggle-active").hover(function (e) {
             if ($(e.target).parent().hasClass("active")) {
 
             }
@@ -138,7 +147,11 @@ module.exports = Backbone.View.extend({
             }
 
             _this.model.doAnalysis(analysis_params);
-        })
+        });
+
+        this.$el.find(".group-save-button").click(function() {
+            _this.getGeneMutationTypes();
+        });
     },
 
     initTypeahead: function(model, typeahead_selector, dropdown_selector) {
@@ -171,6 +184,60 @@ module.exports = Backbone.View.extend({
         UL.sortable();
     },
 
+    initGroupGeneTypeahead: function(model, typeahead_selector, dropdown_selector) {
+        var itemlist = model.get("items");
+
+        var tbody = this.$el.find(".ml2-group-constructor").find("table.group-gene-types").find("tbody");
+        this.$el.find(typeahead_selector).typeahead({
+            source:function (q, p) {
+                p(_.compact(_.flatten(_.map(q.toLowerCase().split(" "), function (qi) {
+                    return _.map(itemlist, function (item) {
+                        if (item.toLowerCase().indexOf(qi) >= 0) return item;
+                    });
+                }))));
+            },
+
+            updater:function (line_item) {
+                var row = $(GroupGeneLineTemplate({"id": line_item}));
+                row.data({'type': 'W'});
+                tbody.append(row);
+
+                row.find(".mutation-type-setter").click(function(e) {
+                    $btn = $(e.target);
+                    $row = $btn.parent().parent();
+
+                    var id = $row.data()['type'];
+                    if (id == 'W') {
+                        $row.data('type', 'M');
+                        $btn.text('M');
+                    }
+                    else {
+                        $row.data('type', 'W');
+                        $btn.text('W');
+                    }
+                });
+
+                row.find(".item-remover").click(function(e) {
+                    $(e.target).parent().parent().remove();
+                });
+
+                return "";
+            }
+        });
+    },
+
+    getGeneMutationTypes: function() {
+        var genes = {},
+            rows = this.$el.find(".ml2-group-constructor").find("table.group-gene-types").find("tbody").find(".gene-item");
+
+        rows.each(function(index, gene_item) {
+            var data = $(gene_item).data();
+            genes[data.id] = data.type;
+        });
+
+        return genes;
+    },
+
     processVerticalLocations: function(nodes) {
         var defaultSpacing = 100;
 
@@ -200,6 +267,8 @@ module.exports = Backbone.View.extend({
         this.$el.html(Template({
 
         }));
+
+        this.$el.find(".ml2-group-constructor").html(GroupConstructTemplate({}));
 
         this.initHandlers();
     },
