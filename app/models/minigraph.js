@@ -47,13 +47,24 @@ var GroupsModel = Backbone.Model.extend({
             });
         });
 
-        return groups;
+        var ids = _.rest(header),
+            indices = _.map(ids, function(d, i) {return i;}),
+            id_to_index_map = _.reduce(ids, function(memo, d, index) {
+                memo[d] = index;
+                return memo;
+            }, {});
+
+        return {
+            indices: indices,
+            ids: ids,
+            id_to_index_map: id_to_index_map,
+            items: groups
+        };
     },
 
     parse: function (txt) {
-        return {
-            "items": this.tsvparse(txt)
-        };
+        return this.tsvparse(txt);
+
     },
 
     fetch: function (options) {
@@ -76,6 +87,43 @@ var BasicModel = Backbone.Model.extend({
                     })
                     .value()
         }
+    },
+
+    fetch: function (options) {
+        var params = _.extend({
+            dataType: "text"
+        }, options);
+
+        return Backbone.Model.prototype.fetch.call(this, params);
+    }
+});
+
+var SparseMatrixModel = Backbone.Model.extend({
+    parse: function (text) {
+        var rows = d3.tsv.parseRows(text);
+
+        return {
+            items:
+                _.chain(rows)
+                    .reduce(function(memo, row) {
+                        var gene_id = row[0].trim();
+                        memo[gene_id] =_.chain(row)
+                            .rest()
+                            .map(function(d) {
+                                return d.trim();
+                            })
+                            .filter(function(d) {
+                                return d.length > 0;
+                            })
+                            .map(function(d) {
+                                return parseInt(d);
+                            })
+                            .value();
+
+                        return memo;
+                    }, {})
+                    .value()
+        };
     },
 
     fetch: function (options) {
@@ -115,11 +163,17 @@ var ML2AnalysisModel = Backbone.Model.extend({
     }
 });
 
+var UserDefinedGroupsCollection = Backbone.Collection.extend({
+
+});
 
 module.exports = Backbone.Model.extend({
     initialize: function() {
         this.set("analysis", new ML2AnalysisModel());
         this.set("groups", new GroupsModel());
+        this.set("mutations", new SparseMatrixModel());
+
+        this.set("user_defined_groups", new UserDefinedGroupsCollection());
 
         this.set("genes", new BasicModel());
         this.set("pathways", new BasicModel());
@@ -150,6 +204,14 @@ module.exports = Backbone.Model.extend({
             async: true,
             success: function() {
                 console.log("Groups loaded");
+            }
+        });
+
+        this.get("mutations").fetch({
+            url: base_uri + this.get("catalog_unit")['gene_mutations'],
+            async: true,
+            success: function(res) {
+                console.log("Mutation IDs loaded");
             }
         });
 
