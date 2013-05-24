@@ -3,6 +3,7 @@ var DataTemplate = require("./templates/minigraph_data");
 var GroupConstructTemplate = require("./templates/minigraph_groups");
 var LineItemTemplate = require("./templates/line_item");
 var GroupGeneLineTemplate = require("./templates/minigraph_gene_row_item");
+var GroupSelectLineTemplate = require("./templates/minigraph_group_menu_item");
 
 module.exports = Backbone.View.extend({
     analysis_config: {
@@ -39,13 +40,17 @@ module.exports = Backbone.View.extend({
     },
 
     initialize: function () {
-        _.bindAll(this, "addUserDefinedGroup", "initGroupSelector", "initTypeahead", "initGroupGeneTypeahead", "initHandlers", "renderData", "renderUI");
+        _.bindAll(this, "addUserDefinedGroup", "buildUserDefinedGroup", "initUserDefinedGroupSelector", "initGroupSelector",
+            "initTypeahead", "initGroupGeneTypeahead", "initHandlers", "submitAnalysisJob", "getSelectedUserDefinedGroups",
+            "getGeneMutationTypes", "renderData", "renderUI");
 
         var _this = this;
 
         this.model.get("groups").on("change", function(model) {
             _this.initGroupSelector(model, ".preset-group-selector-minigraph", _this.analysis_config);
             _this.initGroupSelector(model, ".group-construct-cancer-selector", _this.group_build_config);
+
+            _this.initUserDefinedGroupSelector();
         });
 
         this.model.get("analysis").on("change", this.renderData);
@@ -64,13 +69,17 @@ module.exports = Backbone.View.extend({
         });
 
         this.model.get("user_defined_groups").on("add", function(model) {
-            console.log(model.toJSON());
+            _this.updateUserDefinedGroupSelector(model);
         });
 
         this.renderUI();
 
         this.model.fetchStatic();
         $(window).on("resize", jsPlumb.repaintEverything);
+    },
+
+    initUserDefinedGroupSelector: function() {
+        this.$el.find(".user-defined-group-selector").multiselect({});
     },
 
     initGroupSelector: function (groups_model, element_selector, target_object) {
@@ -111,54 +120,72 @@ module.exports = Backbone.View.extend({
 
     initHandlers: function() {
         var _this = this;
-        this.$el.find(".run-analysis-button").click(function() {
-            if (_this.analysis_config.selected_groups.length < 2) {
-                return;
-            }
 
-            var group_contents = _this.model.get("groups").get("items"),
-                groups_param = _.map(_.pick(group_contents, _this.analysis_config.selected_groups), function(data, key) {
+        this.$el.find(".run-analysis-button").click(function() {
+            _this.submitAnalysisJob();
+        });
+
+        this.$el.find(".group-save-button").click(function() {
+            _this.addUserDefinedGroup();
+        });
+    },
+
+    submitAnalysisJob: function() {
+        var selected_cancers = this.analysis_config.selected_groups,
+            udg = this.getSelectedUserDefinedGroups();
+
+        // At least two groups have to be selected for the analysis
+        if ((selected_cancers.length + udg.length) < 2) {
+            return;
+        }
+
+        var cancer_group_contents = this.model.get("groups").get("items"),
+            groups_param = _.map(_.pick(cancer_group_contents, selected_cancers), function(data, key) {
                 return {
                     id: key,
                     samples: data
                 }
             });
 
-            // Check the value in the cutoff input is a floating point number
-            var cutoff = parseFloat(_this.$el.find(".cutoff-value").val());
-            if (isNaN(cutoff)) {
-                return;
-            }
+        _.chain(udg)
+            .each(function(group_model) {
+                var g = group_model.toJSON();
+                groups_param.push({
+                    id: g.label,
+                    samples: g.group
+                });
+            });
 
-            var afn = function(link) {
-                return $(link).data("id")
-            };
+        // Check the value in the cutoff input is a floating point number
+        var cutoff = parseFloat(this.$el.find(".cutoff-value").val());
+        if (isNaN(cutoff)) {
+            return;
+        }
 
-            var genes = _.map(_this.$el.find(".gene-selector .item-remover"), afn),
-                pathways = _.map(_this.$el.find(".pathway-selector .item-remover"), afn),
-                hallmarks = _.map(_this.$el.find(".hallmark-selector .item-remover"), afn);
+        var afn = function(link) {
+            return $(link).data("id")
+        };
 
-            var analysis_params = {
-                cutoff: cutoff,
-                groups: groups_param
-            };
+        var genes = _.map(this.$el.find(".gene-selector .item-remover"), afn),
+            pathways = _.map(this.$el.find(".pathway-selector .item-remover"), afn),
+            hallmarks = _.map(this.$el.find(".hallmark-selector .item-remover"), afn);
 
-            if (genes.length > 0) {
-                analysis_params.genes = genes;
-            }
-            if (pathways.length > 0) {
-                analysis_params.pathways = pathways;
-            }
-            if (hallmarks.length > 0) {
-                analysis_params.hallmarks = hallmarks;
-            }
+        var analysis_params = {
+            cutoff: cutoff,
+            groups: groups_param
+        };
 
-            _this.model.doAnalysis(analysis_params);
-        });
+        if (genes.length > 0) {
+            analysis_params.genes = genes;
+        }
+        if (pathways.length > 0) {
+            analysis_params.pathways = pathways;
+        }
+        if (hallmarks.length > 0) {
+            analysis_params.hallmarks = hallmarks;
+        }
 
-        this.$el.find(".group-save-button").click(function() {
-            _this.addUserDefinedGroup();
-        });
+        this.model.doAnalysis(analysis_params);
     },
 
     initTypeahead: function(model, typeahead_selector, dropdown_selector) {
@@ -234,22 +261,32 @@ module.exports = Backbone.View.extend({
     },
 
     addUserDefinedGroup: function() {
-        var genes = this.getGeneMutationTypes();
-        var label = this.$el.find(".ml2-group-constructor").find("input.group-label").val();
+        var cancers = this.model.get("groups").get("items"),
+            genes = this.getGeneMutationTypes(),
+            label = this.$el.find(".ml2-group-constructor").find("input.group-label").val(),
+            udg = this.model.get("user_defined_groups");
 
         if (label.trim().length == 0) {
             return;
         }
 
-        var group = this.getUserDefinedGroup(genes);
+        // The group name has to be unique
+        if (udg.find(function(model) {return model.get("label") == label;}) !== undefined) {
+            return;
+        }
+        if (_.has(cancers, label)) {
+            return;
+        }
 
-        this.model.get("user_defined_groups").add({
+        var group = this.buildUserDefinedGroup(genes);
+
+        udg.add({
             label: label,
             group: group
         });
     },
 
-    getUserDefinedGroup: function(genes) {
+    buildUserDefinedGroup: function(genes) {
         var _this = this;
 
         var gene_mutations = this.model.get("mutations").get("items"),
@@ -319,6 +356,34 @@ module.exports = Backbone.View.extend({
         });
 
         return genes;
+    },
+
+    updateUserDefinedGroupSelector: function(model) {
+        var select = this.$el.find(".user-defined-group-selector");
+
+        var item = $(GroupSelectLineTemplate(
+            model.toJSON()
+        ));
+
+        select.append(item);
+
+        this.$el.find(".user-defined-group-selector").multiselect('rebuild');
+
+        this.getSelectedUserDefinedGroups();
+    },
+
+    getSelectedUserDefinedGroups: function() {
+        var user_groups = this.model.get("user_defined_groups");
+
+        var selected_group_ids = this.$el.find(".user-defined-group-selector")
+            .find("option:selected")
+            .map(function(index, el) {
+                return $(el).val();
+            });
+
+        return user_groups.filter(function(group_model) {
+            return _.indexOf(selected_group_ids, group_model.get("label")) != -1;
+        });
     },
 
     processVerticalLocations: function(nodes) {
