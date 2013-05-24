@@ -5,7 +5,12 @@ var LineItemTemplate = require("./templates/line_item");
 var GroupGeneLineTemplate = require("./templates/minigraph_gene_row_item");
 
 module.exports = Backbone.View.extend({
-    selected_groups: [],
+    analysis_config: {
+        selected_groups: []
+    },
+    group_build_config: {
+        selected_groups: []
+    },
     defaultColor: "#4682B4",
     barscale: d3.scale.linear().domain([0, 1]).range([0, 80]),
 
@@ -34,13 +39,13 @@ module.exports = Backbone.View.extend({
     },
 
     initialize: function () {
-        _.bindAll(this, "initGroupSelector", "initTypeahead", "initGroupGeneTypeahead", "initHandlers", "renderData", "renderUI");
+        _.bindAll(this, "addUserDefinedGroup", "initGroupSelector", "initTypeahead", "initGroupGeneTypeahead", "initHandlers", "renderData", "renderUI");
 
         var _this = this;
 
         this.model.get("groups").on("change", function(model) {
-            _this.initGroupSelector(model, ".preset-group-selector-minigraph");
-            _this.initGroupSelector(model, ".group-construct-cancer-selector");
+            _this.initGroupSelector(model, ".preset-group-selector-minigraph", _this.analysis_config);
+            _this.initGroupSelector(model, ".group-construct-cancer-selector", _this.group_build_config);
         });
 
         this.model.get("analysis").on("change", this.renderData);
@@ -58,15 +63,17 @@ module.exports = Backbone.View.extend({
             _this.initTypeahead(model, ".hallmarks-typeahead", ".hallmark-selector");
         });
 
+        this.model.get("user_defined_groups").on("add", function(model) {
+            console.log(model.toJSON());
+        });
+
         this.renderUI();
 
         this.model.fetchStatic();
         $(window).on("resize", jsPlumb.repaintEverything);
     },
 
-    initGroupSelector: function (groups_model, element_selector) {
-        var _this = this;
-
+    initGroupSelector: function (groups_model, element_selector, target_object) {
         var group_names = _.map(groups_model.get("items"), function(group_data, id) {
             return id;
         });
@@ -75,7 +82,7 @@ module.exports = Backbone.View.extend({
 
         _.each(group_names, function (group, idx) {
             group = group.trim();
-            if (this.selected_groups.indexOf(group) >= 0) {
+            if (target_object.selected_groups.indexOf(group) >= 0) {
                 $el.append(LineItemTemplate({"li_class": "active", "a_class": "toggle-active", "id": group, "label": group}));
             } else {
                 $el.append(LineItemTemplate({"a_class": "toggle-active", "id": group, "label": group}));
@@ -89,7 +96,7 @@ module.exports = Backbone.View.extend({
         }, this);
         $el.find(".toggle-active").click(function (e) {
             $(e.target).parent().toggleClass("active");
-            _this.selected_groups = _.map($el.find(".active").find(".toggle-active"), function(liactive) {
+            target_object.selected_groups = _.map($el.find(".active").find(".toggle-active"), function(liactive) {
                 return $(liactive).data("id");
             });
         });
@@ -105,12 +112,12 @@ module.exports = Backbone.View.extend({
     initHandlers: function() {
         var _this = this;
         this.$el.find(".run-analysis-button").click(function() {
-            if (_this.selected_groups.length < 2) {
+            if (_this.analysis_config.selected_groups.length < 2) {
                 return;
             }
 
             var group_contents = _this.model.get("groups").get("items"),
-                groups_param = _.map(_.pick(group_contents, _this.selected_groups), function(data, key) {
+                groups_param = _.map(_.pick(group_contents, _this.analysis_config.selected_groups), function(data, key) {
                 return {
                     id: key,
                     samples: data
@@ -150,7 +157,7 @@ module.exports = Backbone.View.extend({
         });
 
         this.$el.find(".group-save-button").click(function() {
-            _this.getGeneMutationTypes();
+            _this.addUserDefinedGroup();
         });
     },
 
@@ -199,7 +206,7 @@ module.exports = Backbone.View.extend({
 
             updater:function (line_item) {
                 var row = $(GroupGeneLineTemplate({"id": line_item}));
-                row.data({'type': 'W'});
+                row.data({'type': 'M'});
                 tbody.append(row);
 
                 row.find(".mutation-type-setter").click(function(e) {
@@ -224,6 +231,82 @@ module.exports = Backbone.View.extend({
                 return "";
             }
         });
+    },
+
+    addUserDefinedGroup: function() {
+        var genes = this.getGeneMutationTypes();
+        var label = this.$el.find(".ml2-group-constructor").find("input.group-label").val();
+
+        if (label.trim().length == 0) {
+            return;
+        }
+
+        var group = this.getUserDefinedGroup(genes);
+
+        this.model.get("user_defined_groups").add({
+            label: label,
+            group: group
+        });
+    },
+
+    getUserDefinedGroup: function(genes) {
+        var _this = this;
+
+        var gene_mutations = this.model.get("mutations").get("items"),
+            all_indices = this.model.get("groups").get("indices"),
+            all_ids = this.model.get("groups").get("ids"),
+            id_to_index_map = _this.model.get("groups").get("id_to_index_map"),
+            cancers_union;
+
+        // If no cancers are selected, use all samples
+        if (_this.group_build_config.selected_groups.length == 0) {
+            cancers_union = all_indices;
+        }
+        else {
+            // Find the union of the samples in the selected cancers
+            var group_contents = _this.model.get("groups").get("items");
+            cancers_union = _
+                .chain(group_contents)
+                .pick(_this.group_build_config.selected_groups)
+                // Map ID-strings to integers
+                .map(function(group) {
+                    return _.map(group, function(id) {
+                        return id_to_index_map[id];
+                    });
+                })
+                //
+                .reduce(function(memo, group) {
+                    memo = _.union(memo, group);
+                    return memo;
+                }, [])
+                .value();
+        }
+
+        // Find the intersection of the selected genes
+        var genes_intersection = _
+            .chain(genes)
+            .map(function(mutation_type, gene_id) {
+                if (mutation_type == 'M') {
+                    return gene_mutations[gene_id];
+                }
+                else {
+                    return _.difference(all_indices, gene_mutations[gene_id]);
+
+                }
+            })
+            .reduce(function(memo, indices_per_gene) {
+                memo = _.intersection(memo, indices_per_gene);
+                return memo;
+            }, all_indices)
+            .value();
+
+        var group = _.chain(_.intersection(genes_intersection, cancers_union))
+            .map(function(index) {
+                return all_ids[index]
+            })
+            .value();
+
+        return group;
     },
 
     getGeneMutationTypes: function() {
