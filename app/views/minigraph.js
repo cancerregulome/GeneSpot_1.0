@@ -127,6 +127,13 @@ module.exports = Backbone.View.extend({
 
         this.$el.find(".group-save-button").click(function() {
             _this.addUserDefinedGroup();
+            _this.$el.find(".ml2-group-constructor").modal('hide');
+        });
+
+        this.$el.find(".ml2-build-new-group").click(function() {
+            _this.$el.find(".ml2-group-constructor").modal({
+                keyboard: true
+            });
         });
     },
 

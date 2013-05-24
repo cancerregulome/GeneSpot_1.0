@@ -1,5 +1,12 @@
+<div id="myModal" class="modal hide fade ml2-group-constructor" tabindex="-1" role="dialog" aria-labelledby="group-builder-modal-label" aria-hidden="true">
+</div>
+
 <ul class="nav nav-pills preset-group-selector-minigraph"></ul>
-<select class="multiselect user-defined-group-selector" multiple="multiple"></select>
+<div class="input-prepend input-append btn-toolbar">
+    <select class="multiselect user-defined-group-selector" multiple="multiple"></select>
+    <button class="btn ml2-build-new-group">New</button>
+    <a class="btn" href="#"><i class="icon-trash"></i></a>
+</div>
 <ul class="nav nav-pills">
     <li class="dropdown">
         <button class="dropdown-toggle btn btn-success" data-toggle="dropdown" type="button">Genes</button>
@@ -36,5 +43,4 @@
     <input class="input-small cutoff-value span1" type="text" value="0.00001"></input>
 </div>
 <button class="btn run-analysis-button">Run</button>
-<div class="ml2-group-constructor" style="position: relative;"></div>
 <div class="minigraph-data" style="position: relative;"></div>
