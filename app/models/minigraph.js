@@ -98,6 +98,10 @@ var BasicModel = Backbone.Model.extend({
     }
 });
 
+var EmptyModel = Backbone.Model.extend({
+
+});
+
 var SparseMatrixModel = Backbone.Model.extend({
     parse: function (text) {
         var rows = d3.tsv.parseRows(text);
@@ -170,14 +174,17 @@ var UserDefinedGroupsCollection = Backbone.Collection.extend({
 module.exports = Backbone.Model.extend({
     initialize: function() {
         this.set("analysis", new ML2AnalysisModel());
-        this.set("groups", new GroupsModel());
-        this.set("mutations", new SparseMatrixModel());
 
         this.set("user_defined_groups", new UserDefinedGroupsCollection());
 
-        this.set("genes", new BasicModel());
-        this.set("pathways", new BasicModel());
-        this.set("hallmarks", new BasicModel());
+        var static_data = new EmptyModel();
+        static_data.set("groups", new GroupsModel());
+        static_data.set("mutations", new SparseMatrixModel());
+        static_data.set("genes", new BasicModel());
+        static_data.set("pathways", new BasicModel());
+        static_data.set("hallmarks", new BasicModel());
+
+        this.set("static_data", static_data);
     },
 
     url: function () {
@@ -197,9 +204,10 @@ module.exports = Backbone.Model.extend({
     },
 
     fetchStatic: function() {
-        var base_uri = "svc/data/domains/" + this.get("analysis_id") + '/' + this.get("dataset_id") + '/';
+        var base_uri = "svc/data/domains/" + this.get("analysis_id") + '/' + this.get("dataset_id") + '/',
+            static_data = this.get("static_data");
 
-        this.get("groups").fetch({
+        static_data.get("groups").fetch({
             url: base_uri + this.get("catalog_unit")['preset_groups'],
             async: true,
             success: function() {
@@ -207,7 +215,7 @@ module.exports = Backbone.Model.extend({
             }
         });
 
-        this.get("mutations").fetch({
+        static_data.get("mutations").fetch({
             url: base_uri + this.get("catalog_unit")['gene_mutations'],
             async: true,
             success: function(res) {
@@ -215,7 +223,7 @@ module.exports = Backbone.Model.extend({
             }
         });
 
-        this.get("genes").fetch({
+        static_data.get("genes").fetch({
             url: base_uri + this.get("catalog_unit")['genes'],
             async: true,
             success: function(res) {
@@ -223,7 +231,7 @@ module.exports = Backbone.Model.extend({
             }
         });
 
-        this.get("pathways").fetch({
+        static_data.get("pathways").fetch({
             url: base_uri + this.get("catalog_unit")['pathways'],
             async: true,
             success: function(res) {
@@ -231,7 +239,7 @@ module.exports = Backbone.Model.extend({
             }
         });
 
-        this.get("hallmarks").fetch({
+        static_data.get("hallmarks").fetch({
             url: base_uri + this.get("catalog_unit")['hallmarks'],
             async: true,
             success: function(res) {
