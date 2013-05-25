@@ -134,6 +134,10 @@ module.exports = Backbone.View.extend({
                 keyboard: true
             });
         });
+
+        this.$el.find(".remove-user-defined-groups").click(function() {
+            _this.removeSelectedUserDefinedGroups();
+        });
     },
 
     submitAnalysisJob: function() {
@@ -216,7 +220,6 @@ module.exports = Backbone.View.extend({
             }
         });
 
-
         UL.find(".item-remover").click(function(e) {
             $(e.target).parent().remove();
         });
@@ -232,10 +235,7 @@ module.exports = Backbone.View.extend({
         ));
 
         select.append(item);
-
-        this.$el.find(".user-defined-group-selector").multiselect('rebuild');
-
-        this.getSelectedUserDefinedGroups();
+        select.multiselect('rebuild');
     },
 
     getSelectedUserDefinedGroups: function() {
@@ -250,6 +250,36 @@ module.exports = Backbone.View.extend({
         return user_groups.filter(function(group_model) {
             return _.indexOf(selected_group_ids, group_model.get("label")) != -1;
         });
+    },
+
+    removeSelectedUserDefinedGroups: function() {
+        var selected_groups = this.getSelectedUserDefinedGroups();
+
+        if (selected_groups.length == 0) {
+            return;
+        }
+
+        var message;
+        if (selected_groups.length == 1) {
+            message = "Remove one group?";
+        }
+        else {
+            message = "Remove " + selected_groups.length + " groups?";
+        }
+
+        if (confirm(message)) {
+            var select = this.$el.find(".user-defined-group-selector");
+
+            select
+                .find("option:selected")
+                .remove();
+
+            select.multiselect('rebuild');
+
+            _.each(selected_groups, function(group_model) {
+                group_model.destroy();
+            });
+        }
     },
 
     processVerticalLocations: function(nodes) {
