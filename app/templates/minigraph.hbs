@@ -1,4 +1,4 @@
-<div id="myModal" class="modal hide fade ml2-group-constructor" tabindex="-1" role="dialog" aria-labelledby="group-builder-modal-label" aria-hidden="true">
+<div id="myModal" class="modal hide fade ml2-modal" tabindex="-1" role="dialog" aria-labelledby="group-builder-modal-label" aria-hidden="true" style="top: 30%;">
 </div>
 
 <ul class="nav nav-pills preset-group-selector-minigraph"></ul>
@@ -39,8 +39,17 @@
     </li>
 </ul>
 <div class="input-prepend">
-    <span class="add-on">Cutoff</span>
-    <input class="input-small cutoff-value span1" type="text" value="0.00001"></input>
+    <span class="add-on">Gene Cutoff</span>
+    <input class="input-small gene-cutoff-value span1" type="text" value="0.00001"></input>
+    <span class="add-on">Pathway Cutoff</span>
+    <input class="input-small pathway-cutoff-value span1" type="text" value="0.00001"></input>
+    <span class="add-on">Hallmark Cutoff</span>
+    <input class="input-small hallmark-cutoff-value span1" type="text" value="0.00001"></input>
 </div>
-<button class="btn run-analysis-button">Run</button>
+<div class="input-prepend input-append btn-toolbar">
+    <button class="btn run-analysis-button">Run</button>
+    <button class="btn show-gene-heatmap-button">Gene Heatmap</button>
+    <button class="btn show-pathway-heatmap-button">Pathway Heatmap</button>
+    <button class="btn show-hallmark-heatmap-button">Hallmark Heatmap</button>
+</div>
 <div class="minigraph-data" style="position: relative;"></div>

@@ -149,7 +149,10 @@ var ML2AnalysisModel = Backbone.Model.extend({
             nodes: json.nodes.rows,
             measureKeys: json.nodes.ids,
             edges: json.edges.rows,
-            annotations: json.annotations
+            annotations: json.annotations,
+            gene_heatmap: json.geneheatmap,
+            pathway_heatmap: json.pathwayheatmap,
+            hallmark_heatmap: json.hallmarkheatmap
         };
     },
 

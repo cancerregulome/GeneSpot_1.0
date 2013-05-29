@@ -4,6 +4,7 @@ var LineItemTemplate = require("./templates/line_item");
 var GroupSelectLineTemplate = require("./templates/minigraph_group_menu_item");
 
 var GroupBuilderView = require("./minigraph_group_builder");
+var HeatmapView = require("./minigraph_heatmap");
 
 module.exports = Backbone.View.extend({
     analysis_config: {
@@ -71,12 +72,6 @@ module.exports = Backbone.View.extend({
 
         this.renderUI();
 
-        this.group_builder = new GroupBuilderView({
-            el: this.$el.find(".ml2-group-constructor"),
-            model: _this.static_data,
-            user_defined_groups: this.model.get("user_defined_groups")
-        });
-
         this.model.fetchStatic();
 
         $(window).on("resize", jsPlumb.repaintEverything);
@@ -130,9 +125,56 @@ module.exports = Backbone.View.extend({
         });
 
         this.$el.find(".ml2-build-new-group").click(function() {
-            _this.$el.find(".ml2-group-constructor").modal({
-                keyboard: true
+           if (_this.modal_view !== undefined) {
+                _this.modal_view.close();
+            }
+
+            this.modal_view = new GroupBuilderView({
+                el: _this.$el.find(".ml2-modal"),
+                model: _this.static_data,
+                user_defined_groups: _this.model.get("user_defined_groups")
             });
+
+            _this.$el.find(".ml2-modal").modal("show");
+        });
+
+        this.$el.find(".show-gene-heatmap-button").click(function() {
+           if (_this.modal_view !== undefined) {
+                _this.modal_view.close();
+            }
+
+            this.modal_view = new HeatmapView({
+                el: _this.$el.find(".ml2-modal"),
+                data: _this.model.get("analysis").get("gene_heatmap")
+            });
+
+            _this.$el.find(".ml2-modal").modal("show");
+        });
+
+        this.$el.find(".show-pathway-heatmap-button").click(function() {
+           if (_this.modal_view !== undefined) {
+                _this.modal_view.close();
+            }
+
+            this.modal_view = new HeatmapView({
+                el: _this.$el.find(".ml2-modal"),
+                data: _this.model.get("analysis").get("pathway_heatmap")
+            });
+
+            _this.$el.find(".ml2-modal").modal("show");
+        });
+
+        this.$el.find(".show-hallmark-heatmap-button").click(function() {
+            if (_this.modal_view !== undefined) {
+                _this.modal_view.close();
+            }
+
+            this.modal_view = new HeatmapView({
+                el: _this.$el.find(".ml2-modal"),
+                data: _this.model.get("analysis").get("hallmark_heatmap")
+            });
+
+            _this.$el.find(".ml2-modal").modal("show");
         });
 
         this.$el.find(".remove-user-defined-groups").click(function() {
@@ -167,8 +209,11 @@ module.exports = Backbone.View.extend({
             });
 
         // Check the value in the cutoff input is a floating point number
-        var cutoff = parseFloat(this.$el.find(".cutoff-value").val());
-        if (isNaN(cutoff)) {
+        var gene_cutoff = parseFloat(this.$el.find(".gene-cutoff-value").val()),
+            pathway_cutoff = parseFloat(this.$el.find(".pathway-cutoff-value").val()),
+            hallmark_cutoff = parseFloat(this.$el.find(".hallmark-cutoff-value").val());
+
+        if (isNaN(gene_cutoff) || isNaN(pathway_cutoff) || isNaN(hallmark_cutoff)) {
             return;
         }
 
@@ -181,7 +226,9 @@ module.exports = Backbone.View.extend({
             hallmarks = _.map(this.$el.find(".hallmark-selector .item-remover"), afn);
 
         var analysis_params = {
-            cutoff: cutoff,
+            gene_cutoff: gene_cutoff,
+            pathway_cutoff: pathway_cutoff,
+            hallmark_cutoff: hallmark_cutoff,
             groups: groups_param
         };
 
@@ -311,6 +358,11 @@ module.exports = Backbone.View.extend({
         this.$el.html(Template({
 
         }));
+
+        this.$el.find(".ml2-modal").modal({
+            keyboard: true,
+            show: false
+        });
 
         this.initHandlers();
     },
