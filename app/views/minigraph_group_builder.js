@@ -8,18 +8,8 @@ module.exports = Backbone.View.extend({
     },
 
     initialize: function () {
-        var _this = this;
-
-        _.bindAll(this, "addUserDefinedGroup", "initGroupSelector",
-            "initGroupGeneTypeahead", "initHandlers", "getGeneMutationTypes");
-
-        this.model.get("groups").on("change", function(model) {
-            _this.initGroupSelector(model, ".group-construct-cancer-selector", _this.group_build_config);
-        });
-
-        this.model.get("genes").on("change", function(model) {
-            _this.initGroupGeneTypeahead(model, ".group-genes-typeahead", ".group-gene-selector");
-        });
+        _.bindAll(this, "addUserDefinedGroup", "initGroupSelector", "initGroupGeneTypeahead",
+            "initHandlers", "getGeneMutationTypes");
 
         this.render();
         this.initHandlers();
@@ -207,5 +197,14 @@ module.exports = Backbone.View.extend({
         this.$el.html(GroupConstructTemplate({
 
         }));
+
+        this.initGroupSelector(this.model.get("groups"), ".group-construct-cancer-selector", this.group_build_config);
+
+        this.initGroupGeneTypeahead(this.model.get("genes"), ".group-genes-typeahead", ".group-gene-selector");
+    },
+
+    close: function() {
+        this.remove();
+        this.unbind();
     }
 });
