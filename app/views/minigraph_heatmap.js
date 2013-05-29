@@ -8,6 +8,20 @@ module.exports = Backbone.View.extend({
     initialize: function () {
         _.bindAll(this, "render");
 
+        this.color_scale_rgb = [
+            [255, 255, 255],
+            [247, 232, 207],
+            [246, 210, 165],
+            [251, 190, 125],
+            [248, 166, 78],
+            [227, 133, 15],
+            [186, 105, 0],
+            [140, 79, 0],
+            [93, 53, 0],
+            [47, 26, 0],
+            [0, 0, 0]
+        ];
+
         this.render();
     },
 
@@ -21,10 +35,16 @@ module.exports = Backbone.View.extend({
             return r.values;
         }));
 
+        var color_scale_domain = d3.range(min_intensity, max_intensity, (max_intensity - min_intensity) / (this.color_scale_rgb.length - 1));
+        color_scale_domain.push(max_intensity);
+
         var color_scale = d3.scale.linear()
-            .domain([min_intensity, (min_intensity + max_intensity) / 2.0, max_intensity])
+            .domain(color_scale_domain)
             .interpolate(d3.interpolateRgb)
-            .range(['blue', 'green', 'red']);
+            .range(_.map(this.color_scale_rgb, function(d) {
+                // Construct a CSS color identifier, for example 'rgb(255,255,255)'
+                return 'rgb(' + d[0] + ',' + d[1] + ',' + d[2] + ')';
+            }));
 
         var tabledata = {
             column_labels: _.map(data.ids, function(d) {
