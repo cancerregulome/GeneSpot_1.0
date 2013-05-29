@@ -20,7 +20,7 @@ settings = {
 }
 
 def parseNodes(filepath):
-    INFO_FIELDS = frozenset(['id', 'type', '_yloc'])
+    INFO_FIELDS = frozenset(['id', 'type', '_yloc', 'p-value', 'info', 'link'])
 
     if not os.path.isfile(filepath):
         return
@@ -33,6 +33,10 @@ def parseNodes(filepath):
     for row in dictreader:
         dr = {"id": row['id'],
               "type": row['type'],
+              "_yloc": row['_yloc'],
+              "p-value": row['p-value'],
+              "info": row['info'],
+              "link": row['link'],
               "values": [(lambda x: float(row[x]))(df) for df in data_fields]}
 
         if '_yloc' in row:
@@ -72,13 +76,38 @@ def parseAnnotations(filepath):
     return data
 
 
+def parseHeatmap(filepath, id_column):
+    info_fields = set([id_column])
+
+    if not os.path.isfile(filepath):
+        return
+
+    dictreader = csv.DictReader(open(filepath, "rb"), delimiter='\t')
+
+    data_fields = [x for x in dictreader.fieldnames if x not in info_fields]
+    data_rows = []
+
+    for row in dictreader:
+        dr = {"id": row[id_column],
+              "values": [(lambda x: float(row[x]))(df) for df in data_fields]}
+
+        data_rows.append(dr)
+
+    result = {"ids": data_fields,
+              "rows": data_rows}
+
+    return result
+
+
 class ML2Analysis(tornado.web.RequestHandler):
     def validateQuery(self, params):
         result = dict()
 
         try:
-            # Cutoff must be a float
-            cutoff = float(params['cutoff'])
+            # The cutoff values have be a floats
+            gene_cutoff = float(params['gene_cutoff'])
+            pathway_cutoff = float(params['pathway_cutoff'])
+            hallmark_cutoff = float(params['hallmark_cutoff'])
 
             if 'groups' not in params:
                 raise Exception("Invalid parameters", params)
@@ -95,7 +124,13 @@ class ML2Analysis(tornado.web.RequestHandler):
             outfile.write('\t'.join(row_data) + '\n')
 
         # Cutoff value
-        outfile.write('\t'.join(['CUTOFF', str(params['cutoff'])]) + '\n')
+        outfile.write('\t'.join(['GENE_CUTOFF', str(params['gene_cutoff'])]) + '\n')
+
+        # Cutoff value
+        outfile.write('\t'.join(['PATHWAY_CUTOFF', str(params['pathway_cutoff'])]) + '\n')
+
+        # Cutoff value
+        outfile.write('\t'.join(['HALLMARK_CUTOFF', str(params['hallmark_cutoff'])]) + '\n')
 
         # Genes - optional
         if 'genes' in params:
@@ -139,6 +174,21 @@ class ML2Analysis(tornado.web.RequestHandler):
         annotations_out_file.close()
         logging.debug("Temp annotations file= %s" % annotations_out_path)
 
+        geneheatmap_out_file = NamedTemporaryFile(delete=False)
+        geneheatmap_out_path = geneheatmap_out_file.name
+        geneheatmap_out_file.close()
+        logging.debug("Temp gene heatmap file= %s" % geneheatmap_out_path)
+
+        pathwayheatmap_out_file = NamedTemporaryFile(delete=False)
+        pathwayheatmap_out_path = pathwayheatmap_out_file.name
+        pathwayheatmap_out_file.close()
+        logging.debug("Temp pathways heatmap file= %s" % pathwayheatmap_out_path)
+
+        hallmarkheatmap_out_file = NamedTemporaryFile(delete=False)
+        hallmarkheatmap_out_path = hallmarkheatmap_out_file.name
+        hallmarkheatmap_out_file.close()
+        logging.debug("Temp hallmarks heatmap file= %s" % hallmarkheatmap_out_path)
+
         # Create input file content for the Matlab script
         self.createInputFile(input_params, input_file)
         input_file.close()
@@ -149,14 +199,19 @@ class ML2Analysis(tornado.web.RequestHandler):
             script_file = os.path.basename(script_path)
             matlab_function = script_file.rsplit('.m')[0]
 
-            # The Matlab function takes a path to a .mat-file as the first parameter. The name
-            # of the .mat-file is supposed to be script's name with '.mat' file ending instead
-            # of '.m'
-            preset_input_path = os.path.join(script_dir, matlab_function + '.mat')
+            # The Matlab function takes a path to a .mat-file as the first parameter.
+            preset_input_path = os.path.join(script_dir, options.ml2_data)
 
             # Quote all parameters
             matlab_function_parameters = []
-            for p in [preset_input_path, input_path, nodes_out_path, edges_out_path, annotations_out_path]:
+            for p in [preset_input_path,
+                      input_path,
+                      nodes_out_path,
+                      edges_out_path,
+                      annotations_out_path,
+                      geneheatmap_out_path,
+                      pathwayheatmap_out_path,
+                      hallmarkheatmap_out_path]:
                 matlab_function_parameters.append("'" + p + "'")
 
             matlab_cmd = ['cd(\'' + script_dir + '\')']
@@ -168,6 +223,9 @@ class ML2Analysis(tornado.web.RequestHandler):
             result_obj["edges"] = parseEdges(edges_out_path)
             result_obj["nodes"] = parseNodes(nodes_out_path)
             result_obj["annotations"] = parseAnnotations(annotations_out_path)
+            result_obj["geneheatmap"] = parseHeatmap(geneheatmap_out_path, 'geneheatmap')
+            result_obj["pathwayheatmap"] = parseHeatmap(pathwayheatmap_out_path, 'pathwayheatmap')
+            result_obj["hallmarkheatmap"] = parseHeatmap(hallmarkheatmap_out_path, 'hallmarkheatmap')
 
         finally:
             # Remove the temporary files
@@ -175,6 +233,10 @@ class ML2Analysis(tornado.web.RequestHandler):
             os.unlink(edges_out_path)
             os.unlink(nodes_out_path)
             os.unlink(annotations_out_path)
+            os.unlink(geneheatmap_out_path)
+            os.unlink(pathwayheatmap_out_path)
+            os.unlink(hallmarkheatmap_out_path)
+
 
     def post(self):
         if 'verbose' in options:
@@ -213,12 +275,14 @@ def main():
     define("verbose", default=False, help="Prints debugging statements")
     define("matlab_executable", default=".", help="Path to Matlab executable")
     define("ml2_script", default=".", help="Path to ML2 analysis script")
+    define("ml2_data", default=".", help="Path to ML2 support data file (.mat)")
 
     tornado.options.parse_command_line()
 
     logging.info("Starting Tornado web server on http://localhost:%s" % options.port)
     logging.info("--matlab_executable=%s" % options.matlab_executable)
     logging.info("--ml2_script=%s" % options.ml2_script)
+    logging.info("--ml2_data=%s" % options.ml2_data)
     logging.info("--verbose=%s" % options.verbose)
 
     application = tornado.web.Application([
