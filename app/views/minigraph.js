@@ -2,7 +2,7 @@ var Template = require("../templates/minigraph");
 var DataTemplate = require("./templates/minigraph_data");
 var LineItemTemplate = require("./templates/line_item");
 var GroupSelectLineTemplate = require("./templates/minigraph_group_menu_item");
-
+var NodePopoverTemplate = require("./templates/minigraph_node_popover");
 var GroupBuilderView = require("./minigraph_group_builder");
 var HeatmapView = require("./minigraph_heatmap");
 
@@ -48,7 +48,6 @@ module.exports = Backbone.View.extend({
 
         this.static_data.get("groups").on("change", function(model) {
             _this.initGroupSelector(model, ".preset-group-selector-minigraph", _this.analysis_config);
-
             _this.initUserDefinedGroupSelector();
         });
 
@@ -409,7 +408,7 @@ module.exports = Backbone.View.extend({
 
         _.each(nodesByType, function(nodeData, typeKey) {
             nodeData.width = nodeWidths[typeKey];
-            nodeData.offset =  columnOffsets[typeKey];
+            nodeData.offset = columnOffsets[typeKey];
         });
 
         var graph_el = this.$el.find(".minigraph-data");
@@ -431,6 +430,18 @@ module.exports = Backbone.View.extend({
         graph_el.find(".node-measures").css({
             "margin": this.getAnnotation("barMargin", 2),
             "height": this.getAnnotation("barHeight", 15)
+        });
+
+        // Set up a popover for each node
+        _.each(analysis_model.get("nodes"), function(node) {
+            var $node_el = graph_el.find("#" + node.uid);
+            $node_el.popover({
+                title: node.id,
+                trigger: 'click',
+                placement: 'top',
+                html: true,
+                content: NodePopoverTemplate(node)
+            });
         });
 
         this.renderConnections(analysis_model);
