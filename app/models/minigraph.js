@@ -251,10 +251,11 @@ module.exports = Backbone.Model.extend({
         });
     },
 
-    doAnalysis: function(analysis_params) {
+    doAnalysis: function(analysis_params, failure_handler) {
         var analysis = this.get("analysis");
         analysis.fetch({
-            query: analysis_params
+            query: analysis_params,
+            error: failure_handler
         })
     },
 

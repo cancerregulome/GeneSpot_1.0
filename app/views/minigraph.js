@@ -40,7 +40,7 @@ module.exports = Backbone.View.extend({
     initialize: function () {
         var _this = this;
 
-        _.bindAll(this, "initUserDefinedGroupSelector", "initGroupSelector",
+        _.bindAll(this, "initUserDefinedGroupSelector", "initGroupSelector", "handleAnalysisFailed",
             "initTypeahead", "initHandlers", "submitAnalysisJob", "getSelectedUserDefinedGroups",
             "renderData", "renderUI");
 
@@ -202,7 +202,21 @@ module.exports = Backbone.View.extend({
             analysis_params.hallmarks = hallmarks;
         }
 
-        this.model.doAnalysis(analysis_params);
+        // Disable the 'Run'-button
+        this.$el.find(".run-analysis-button").attr('disabled', 'disabled');
+
+        // Display status message
+        this.$el.find(".analysis-indicator").text("Analysis running...");
+
+        this.model.doAnalysis(analysis_params, this.handleAnalysisFailed);
+    },
+
+    handleAnalysisFailed: function() {
+        // Display error
+        this.$el.find(".analysis-indicator").text("Analysis failed!");
+
+        // Enable the 'run'-button
+        this.$el.find(".run-analysis-button").removeAttr('disabled');
     },
 
     initTypeahead: function(model, typeahead_selector, dropdown_selector) {
@@ -330,6 +344,16 @@ module.exports = Backbone.View.extend({
     renderData: function (analysis_model) {
         var _this = this;
 
+        // Display status message
+        this.$el.find(".analysis-indicator").text("Analysis done!");
+
+        // Enable the 'run'-button
+        this.$el.find(".run-analysis-button").removeAttr('disabled');
+
+        var graph_el = this.$el.find(".minigraph-data");
+
+        graph_el.html("");
+
         var colormap = this.getAnnotation("colors", {}),
             columnOffsets = this.getAnnotation("columnOffsets", {
                 Gene: 1,
@@ -374,7 +398,6 @@ module.exports = Backbone.View.extend({
             nodeData.offset = columnOffsets[typeKey];
         });
 
-        var graph_el = this.$el.find(".minigraph-data");
 
         graph_el.html(DataTemplate({
             "nodesByType": nodesByType,
