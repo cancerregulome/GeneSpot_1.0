@@ -10,6 +10,7 @@ module.exports = Backbone.View.extend({
     analysis_config: {
         selected_groups: []
     },
+    slider_pvalues: [1e-100, 1e-50, 1e-25, 1e-20, 1e-15, 1e-10, 1e-8, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 5e-2, 1],
     defaultColor: "#4682B4",
     barscale: d3.scale.linear().domain([0, 1]).range([0, 80]),
 
@@ -40,8 +41,8 @@ module.exports = Backbone.View.extend({
     initialize: function () {
         var _this = this;
 
-        _.bindAll(this, "initUserDefinedGroupSelector", "initGroupSelector", "handleAnalysisFailed",
-            "initTypeahead", "initHandlers", "submitAnalysisJob", "getSelectedUserDefinedGroups",
+        _.bindAll(this, "initUserDefinedGroupSelector", "initGroupSelector", "initCutoffSliders", "handleAnalysisFailed",
+            "initTypeahead", "initHandlers", "initSlider", "submitAnalysisJob", "getSelectedUserDefinedGroups",
             "renderData", "renderUI");
 
         this.static_data = this.model.get("static_data");
@@ -70,6 +71,7 @@ module.exports = Backbone.View.extend({
         });
 
         this.renderUI();
+        this.initCutoffSliders();
 
         this.model.fetchStatic();
 
@@ -116,6 +118,37 @@ module.exports = Backbone.View.extend({
         });
     },
 
+    initCutoffSliders: function() {
+        var _this = this;
+        var $slider_el = this.$el.find(".cutoff-sliders");
+
+        this.cutoff_values = {
+            gene: 0.00001,
+            pathway: 0.00001,
+            hallmark: 0.00001
+        };
+
+        this.initSlider($slider_el.find(".slider.gene-cutoff"), this.cutoff_values.gene,
+            function(pval) {
+                $slider_el.find(".indicator.gene-cutoff").text(pval);
+                _this.cutoff_values.gene = pval;
+            });
+        this.initSlider($slider_el.find(".slider.pathway-cutoff"), this.cutoff_values.pathway,
+            function(pval) {
+                $slider_el.find(".indicator.pathway-cutoff").text(pval);
+                _this.cutoff_values.pathway = pval;
+            });
+         this.initSlider($slider_el.find(".slider.hallmark-cutoff"), this.cutoff_values.hallmark,
+            function(pval) {
+                $slider_el.find(".indicator.hallmark-cutoff").text(pval);
+                _this.cutoff_values.hallmark = pval;
+            });
+
+        $slider_el.find(".indicator.gene-cutoff").text(this.cutoff_values.gene);
+        $slider_el.find(".indicator.pathway-cutoff").text(this.cutoff_values.pathway);
+        $slider_el.find(".indicator.hallmark-cutoff").text(this.cutoff_values.hallmark);
+    },
+
     initHandlers: function() {
         var _this = this;
 
@@ -140,6 +173,23 @@ module.exports = Backbone.View.extend({
         this.$el.find(".remove-user-defined-groups").click(function() {
             _this.removeSelectedUserDefinedGroups();
         });
+    },
+
+    initSlider: function(slider_el, initial_value, callback) {
+        var _this = this,
+            max_index = this.slider_pvalues.length - 1;
+
+        $(slider_el).slider({
+            min: 0,
+            max: max_index,
+            slide: function(event, ui) {
+                var pval = _this.slider_pvalues[ui.value];
+                callback(pval);
+            },
+            value: _.indexOf(_this.slider_pvalues, initial_value)
+        });
+
+        return $(slider_el);
     },
 
     submitAnalysisJob: function() {
@@ -168,15 +218,6 @@ module.exports = Backbone.View.extend({
                 });
             });
 
-        // Check the value in the cutoff input is a floating point number
-        var gene_cutoff = parseFloat(this.$el.find(".gene-cutoff-value").val()),
-            pathway_cutoff = parseFloat(this.$el.find(".pathway-cutoff-value").val()),
-            hallmark_cutoff = parseFloat(this.$el.find(".hallmark-cutoff-value").val());
-
-        if (isNaN(gene_cutoff) || isNaN(pathway_cutoff) || isNaN(hallmark_cutoff)) {
-            return;
-        }
-
         var afn = function(link) {
             return $(link).data("id")
         };
@@ -186,9 +227,9 @@ module.exports = Backbone.View.extend({
             hallmarks = _.map(this.$el.find(".hallmark-selector .item-remover"), afn);
 
         var analysis_params = {
-            gene_cutoff: gene_cutoff,
-            pathway_cutoff: pathway_cutoff,
-            hallmark_cutoff: hallmark_cutoff,
+            gene_cutoff: this.cutoff_values.gene,
+            pathway_cutoff: this.cutoff_values.pathway,
+            hallmark_cutoff: this.cutoff_values.hallmark,
             groups: groups_param
         };
 

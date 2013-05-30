@@ -38,14 +38,37 @@
         <input class="hallmarks-typeahead" type="text" placeholder="Add a hallmark..."/>
     </li>
 </ul>
-<div class="input-prepend">
-    <span class="add-on">Gene Cutoff</span>
-    <input class="input-small gene-cutoff-value span1" type="text" value="0.00001"></input>
-    <span class="add-on">Pathway Cutoff</span>
-    <input class="input-small pathway-cutoff-value span1" type="text" value="0.00001"></input>
-    <span class="add-on">Hallmark Cutoff</span>
-    <input class="input-small hallmark-cutoff-value span1" type="text" value="0.00001"></input>
-    <button class="btn run-analysis-button">Run</button>
-    <p class="add-on lead analysis-indicator">Analysis not running</p>
+<div class="row cutoff-sliders">
+    <div class="span2">
+        <div class="input-prepend">
+            <span class="add-on">Gene Cutoff</span>
+            <p class="add-on lead indicator gene-cutoff">1.00</p>
+        </div>
+        <div class="slider gene-cutoff" style="width: 100px;"></div>
+    </div>
+
+    <div class="span2">
+        <div class="input-prepend">
+            <span class="add-on">Pathway Cutoff</span>
+            <p class="add-on lead indicator pathway-cutoff">1.00</p>
+        </div>
+        <div class="slider pathway-cutoff" style="width: 100px;"></div>
+    </div>
+
+    <div class="span2">
+        <div class="input-prepend">
+            <span class="add-on">Hallmark Cutoff</span>
+            <p class="add-on lead indicator hallmark-cutoff">1.00</p>
+        </div>
+        <div class="slider hallmark-cutoff" style="width: 100px;"></div>
+    </div>
+
+    <div class="span2">
+        <div class="input-prepend">
+            <button class="btn run-analysis-button">Run</button>
+            <p class="add-on lead analysis-indicator">Analysis not running</p>
+        </div>
+    </div>
 </div>
+
 <div class="minigraph-data" style="position: relative;"></div>
