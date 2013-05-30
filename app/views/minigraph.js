@@ -10,7 +10,7 @@ module.exports = Backbone.View.extend({
     analysis_config: {
         selected_groups: []
     },
-    slider_pvalues: [1e-100, 1e-50, 1e-25, 1e-20, 1e-15, 1e-10, 1e-8, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 5e-2, 1],
+    slider_pvalues: [1e-100, 1e-50, 1e-25, 1e-20, 1e-15, 1e-10, 1e-8, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 5e-2, 1e0, 10],
     defaultColor: "#4682B4",
     barscale: d3.scale.linear().domain([0, 1]).range([0, 80]),
 
