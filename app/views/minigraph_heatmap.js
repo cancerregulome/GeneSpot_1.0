@@ -47,6 +47,7 @@ module.exports = Backbone.View.extend({
             }));
 
         var tabledata = {
+            caption: this.options.caption,
             column_labels: _.map(data.ids, function(d) {
                 return {
                     id: d

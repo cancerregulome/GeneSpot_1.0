@@ -137,45 +137,6 @@ module.exports = Backbone.View.extend({
             _this.$el.find(".ml2-modal").modal("show");
         });
 
-        this.$el.find(".show-gene-heatmap-button").click(function() {
-           if (_this.modal_view !== undefined) {
-                _this.modal_view.close();
-            }
-
-            this.modal_view = new HeatmapView({
-                el: _this.$el.find(".ml2-modal"),
-                data: _this.model.get("analysis").get("gene_heatmap")
-            });
-
-            _this.$el.find(".ml2-modal").modal("show");
-        });
-
-        this.$el.find(".show-pathway-heatmap-button").click(function() {
-           if (_this.modal_view !== undefined) {
-                _this.modal_view.close();
-            }
-
-            this.modal_view = new HeatmapView({
-                el: _this.$el.find(".ml2-modal"),
-                data: _this.model.get("analysis").get("pathway_heatmap")
-            });
-
-            _this.$el.find(".ml2-modal").modal("show");
-        });
-
-        this.$el.find(".show-hallmark-heatmap-button").click(function() {
-            if (_this.modal_view !== undefined) {
-                _this.modal_view.close();
-            }
-
-            this.modal_view = new HeatmapView({
-                el: _this.$el.find(".ml2-modal"),
-                data: _this.model.get("analysis").get("hallmark_heatmap")
-            });
-
-            _this.$el.find(".ml2-modal").modal("show");
-        });
-
         this.$el.find(".remove-user-defined-groups").click(function() {
             _this.removeSelectedUserDefinedGroups();
         });
@@ -367,6 +328,8 @@ module.exports = Backbone.View.extend({
     },
 
     renderData: function (analysis_model) {
+        var _this = this;
+
         var colormap = this.getAnnotation("colors", {}),
             columnOffsets = this.getAnnotation("columnOffsets", {
                 Gene: 1,
@@ -445,6 +408,48 @@ module.exports = Backbone.View.extend({
         });
 
         this.renderConnections(analysis_model);
+
+        graph_el.find(".clickable-header.Gene").click(function() {
+            if (_this.modal_view !== undefined) {
+                _this.modal_view.close();
+            }
+
+            this.modal_view = new HeatmapView({
+                el: _this.$el.find(".ml2-modal"),
+                data: _this.model.get("analysis").get("gene_heatmap"),
+                caption: "Heatmap - Genes"
+            });
+
+            _this.$el.find(".ml2-modal").modal("show");
+        });
+
+        graph_el.find(".clickable-header.Pathway").click(function() {
+            if (_this.modal_view !== undefined) {
+                _this.modal_view.close();
+            }
+
+            this.modal_view = new HeatmapView({
+                el: _this.$el.find(".ml2-modal"),
+                data: _this.model.get("analysis").get("pathway_heatmap"),
+                caption: "Heatmap - Pathways"
+            });
+
+            _this.$el.find(".ml2-modal").modal("show");
+        });
+
+        graph_el.find(".clickable-header.Hallmark").click(function() {
+            if (_this.modal_view !== undefined) {
+                _this.modal_view.close();
+            }
+
+            this.modal_view = new HeatmapView({
+                el: _this.$el.find(".ml2-modal"),
+                data: _this.model.get("analysis").get("hallmark_heatmap"),
+                caption: "Heatmap - Hallmarks"
+            });
+
+            _this.$el.find(".ml2-modal").modal("show");
+        });
     },
 
     renderConnections: function (analysis_model) {
