@@ -1,7 +1,7 @@
 <div class="row">
     {{#each nodesByType}}
     <div class="span3 offset{{offset}}" style="width: {{width}}px">
-        <h4>{{@key}}</h4>
+        <h4 class="clickable-header {{@key}}">{{@key}}</h4>
         {{#each this}}
         <div id="{{uid}}" class="node-info well" style="position: absolute; top: {{_top}}px; width: {{../width}}px">
             {{id}}
