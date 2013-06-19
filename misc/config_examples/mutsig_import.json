@@ -1,0 +1,20 @@
+{
+    "label":"MutSig rankings",
+    "description":"Description of the data set",
+    "collection": "mutsig_collection",
+    "data": {
+    	"base_path": "/path/to/mutsig_data_base_directory",
+	    "files": [
+			{
+				"cancer": "gbm",
+				"path": "path/to/GBM.sig_genes.txt",
+    			"format": "cv"
+			},
+			{
+				"cancer": "brca",
+				"path": "path/to/BRCA.sig_genes.txt",
+    			"format": "cv"
+			}   
+	    ]
+	}
+}
