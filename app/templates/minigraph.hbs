@@ -1,28 +1,74 @@
-<div class="row">
-    {{#each nodesByType}}
-    <div class="span3 offset{{offset}}" style="width: {{width}}px">
-        <h4>{{@key}}</h4>
-        {{#each this}}
-        <div id="{{uid}}" class="node-info well" style="position: absolute; top: {{_top}}px; width: {{../width}}px">
-            {{id}}
-            <ul class="nav nav-list">
-                {{#each measures}}
-                <li title="{{key}}: {{value}}" data-placement="left">
-                    <span class="node-measures" data-key="{{key}}" style="background:{{color}}; padding-right: {{barlength}}px;">&nbsp;</span>
-                </li>
-                {{/each}}
-            </ul>
-        </div>
-        {{/each}}
-    </div>
-    {{/each}}
+<div id="myModal" class="modal hide fade ml2-modal" tabindex="-1" role="dialog" aria-labelledby="group-builder-modal-label" aria-hidden="true" style="top: 30%;">
 </div>
-<ul class="minigraph-legend pull-right well nav nav-list">
-    {{#each legends}}
-    <li>
-        <span style="background-color: {{color}}; height: 20px;">
-            <a href="#" onclick="return false;" class="color-picker" data-key="{{label}}">&nbsp;&nbsp;&nbsp;</a>
-        </span>&nbsp;{{label}}
+
+<ul class="nav nav-pills preset-group-selector-minigraph"></ul>
+<div class="input-prepend input-append btn-toolbar">
+    <select class="multiselect user-defined-group-selector" multiple="multiple"></select>
+    <button class="btn ml2-build-new-group">New</button>
+    <a class="btn remove-user-defined-groups" href="#"><i class="icon-trash"></i></a>
+</div>
+<ul class="nav nav-pills">
+    <li class="dropdown">
+        <button class="dropdown-toggle btn btn-success" data-toggle="dropdown" type="button">Genes</button>
+        <ul class="dropdown-menu gene-selector">
+
+        </ul>
     </li>
-    {{/each}}
+    <li>
+        <input class="genes-typeahead" type="text" placeholder="Add a gene..."/>
+    </li>
+
+    <li class="dropdown">
+        <button class="dropdown-toggle btn btn-success" data-toggle="dropdown" type="button">Pathways</button>
+        <ul class="dropdown-menu pathway-selector">
+
+        </ul>
+    </li>
+    <li>
+        <input class="pathways-typeahead" type="text" placeholder="Add a pathway..."/>
+    </li>
+
+    <li class="dropdown">
+        <button class="dropdown-toggle btn btn-success" data-toggle="dropdown" type="button">Hallmarks</button>
+        <ul class="dropdown-menu hallmark-selector">
+
+        </ul>
+    </li>
+    <li>
+        <input class="hallmarks-typeahead" type="text" placeholder="Add a hallmark..."/>
+    </li>
 </ul>
+<div class="row cutoff-sliders">
+    <div class="span2">
+        <div class="input-prepend">
+            <span class="add-on">Gene Cutoff</span>
+            <p class="add-on lead indicator gene-cutoff">1.00</p>
+        </div>
+        <div class="slider gene-cutoff" style="width: 100px;"></div>
+    </div>
+
+    <div class="span2">
+        <div class="input-prepend">
+            <span class="add-on">Pathway Cutoff</span>
+            <p class="add-on lead indicator pathway-cutoff">1.00</p>
+        </div>
+        <div class="slider pathway-cutoff" style="width: 100px;"></div>
+    </div>
+
+    <div class="span2">
+        <div class="input-prepend">
+            <span class="add-on">Hallmark Cutoff</span>
+            <p class="add-on lead indicator hallmark-cutoff">1.00</p>
+        </div>
+        <div class="slider hallmark-cutoff" style="width: 100px;"></div>
+    </div>
+
+    <div class="span2">
+        <div class="input-prepend">
+            <button class="btn run-analysis-button">Run</button>
+            <p class="add-on lead analysis-indicator">Analysis not running</p>
+        </div>
+    </div>
+</div>
+
+<div class="minigraph-data" style="position: relative;"></div>
