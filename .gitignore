@@ -13,8 +13,15 @@ logs
 results
 
 .idea
-node_modules
-npm-debug.log
-_public
 
 proxy.json
+node_modules
+dist
+.tmp
+.sass-cache
+app/components
+app/data
+python
+proxy.json
+app/bower_components
+npm-debug.log
