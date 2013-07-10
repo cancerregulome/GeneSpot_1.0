@@ -6,7 +6,7 @@ define   (['jquery', 'underscore', 'backbone', 'router',
     'models/feature_matrix',
 
     'views/items_grid_view'],
-function ( $,        _,            Backbone,   QEDRouter,
+function ( $,        _,            Backbone,   AppRouter,
            SessionsCollection,
            CatalogModel,
            AnnotationsModel,
@@ -55,29 +55,18 @@ function ( $,        _,            Backbone,   QEDRouter,
         }
     };
 
-    obj.FetchAnnotations = function (dataset_id) {
-        var that = this;
-
-        if (_.isEmpty(this.Annotations[dataset_id])) {
-            var annotations = new this.Models.Annotations({
-                "url":"svc/data/annotations/" + dataset_id + ".json",
-                "dataType":"json"}
-            );
-
-            annotations.fetch({
-                "async":false,
-                "dataType":"json",
-                "success":function () {
-                    that.Annotations[dataset_id] = annotations.get("itemsById");
-                }
-            });
-        }
-        return this.Annotations[dataset_id];
-    };
-
     obj.startRouter = function() {
-        this.Router = new QEDRouter();
-        this.Router.initTopNavBar();
+        this.Router = new AppRouter({
+            Annotations: this.Annotations,
+            Datamodel: this.Datamodel,
+            Sessions: this.Sessions,
+            Views: this.Views,
+            Models: this.Models,
+            ViewMappings: this.ViewMappings
+        });
+        this.Router.initTopNavBar({
+            Display: this.Display
+        });
 
         Backbone.history.start();
         this.Events.trigger("ready");
@@ -112,31 +101,7 @@ function ( $,        _,            Backbone,   QEDRouter,
 
         this.Datamodel.fetch({
             url:"svc/configurations/datamodel.json",
-            success:function () {
-                var section_ids = _.without(_.keys(that.Datamodel.attributes), "url");
-                var catalog_counts = _.map(section_ids, function (section_id) {
-                    var section = that.Datamodel.get(section_id);
-                    return _.without(_.keys(section), "label").length;
-                });
-
-                var allCatalogs = _.reduce(_.flatten(catalog_counts), function (sum, next) {
-                    return sum + next;
-                });
-
-                var initLayoutFn = _.after(allCatalogs, that.startupUI);
-
-                _.each(section_ids, function (section_id) {
-                    _.each(that.Datamodel.get(section_id), function (unit, unit_id) {
-                        if (unit_id != "label") {
-                            var catalog = new that.Models.Catalogs({"url":"svc/data/" + section_id + "/" + unit_id + "/CATALOG", "unit":unit});
-                            catalog.fetch({
-                                success:initLayoutFn,
-                                error:initLayoutFn
-                            });
-                        }
-                    });
-                });
-            },
+            success: that.startupUI,
             error: that.startupUI
         });
 
@@ -145,7 +110,7 @@ function ( $,        _,            Backbone,   QEDRouter,
         });
     };
 
-    _.bindAll(obj, 'FetchAnnotations', 'startRouter', 'startupUI', 'initialize');
+    _.bindAll(obj, 'startRouter', 'startupUI', 'initialize');
 
     return obj;
 

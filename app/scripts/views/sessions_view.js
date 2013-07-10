@@ -7,7 +7,8 @@ function ( $,        _,            Backbone,
            LineItemTemplate) {
 
 return Backbone.View.extend({
-    initialize:function () {
+    initialize:function (params) {
+        _.extend(this, params);
         _.bindAll(this, "loadSession", "loadSessions", "saveNewSession", "saveSession", "getProducerAttributes");
 
         $(document.body).append(SessionLabelTemplate());
@@ -20,13 +21,13 @@ return Backbone.View.extend({
         $("a.load-session").on("click", this.loadSession);
         $("a.save-session").on("click", this.saveSession);
 
-        qed.Sessions.All.on("add", this.loadSessions);
+        this.Router.Sessions.All.on("add", this.loadSessions);
         this.loadSessions();
     },
 
     loadSessions:function () {
         this.$el.empty();
-        _.each(qed.Sessions.All.models, function (item) {
+        _.each(this.Router.Sessions.All.models, function (item) {
             this.$el.append(LineItemTemplate({ "a_class":"load-session", "id":item.get("id"), "label": item.get("label") }));
         }, this);
     },
@@ -38,7 +39,7 @@ return Backbone.View.extend({
             $("a.save-session").data("id", sessionId);
             this.$el.find("i").removeClass("icon-ok");
             $(e.target).find("i").addClass("icon-ok");
-            qed.Router.navigate("#s/" + sessionId, {trigger:true});
+            this.Router.navigate("#s/" + sessionId, {trigger:true});
         }
     },
 
@@ -49,13 +50,13 @@ return Backbone.View.extend({
         this.$el.find("i").removeClass("icon-ok");
 
         var newSession = _.extend(this.getProducerAttributes(), { "label":label.trim(), "route":Backbone.history.fragment });
-        qed.Sessions.All.create(newSession, {wait: true});
+        this.Router.Sessions.All.create(newSession, {wait: true});
     },
 
     saveSession:function (e) {
         var sessionId = $(e.target).data("id");
         if (sessionId) {
-            var session = qed.Sessions.All.get(sessionId);
+            var session = this.Router.Sessions.All.get(sessionId);
             if (session) {
                 session.save(_.extend(this.getProducerAttributes(), { "route":Backbone.history.fragment }));
             }
@@ -64,7 +65,7 @@ return Backbone.View.extend({
 
     getProducerAttributes:function () {
         var producer_attributes = {};
-        _.each(qed.Sessions.Producers, function (producer, key) {
+        _.each(this.Router.Sessions.Producers, function (producer, key) {
             var currentState = producer.currentState();
             if (currentState) {
                 producer_attributes[key] = currentState;

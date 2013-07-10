@@ -18,10 +18,10 @@ return Backbone.View.extend({
         var unitId = this.unitId;
         var itemId = this.itemId;
 
-        var section = qed.Datamodel.get(sectionId);
+        var section = this.Router.Datamodel.get(sectionId);
         var catalog = section[unitId].catalog;
         var item = catalog[itemId];
-        var views = qed.ViewMappings[item.model] || [
+        var views = this.Router.ViewMappings[item.model] || [
             {"label":"Grid", "id":"grid"}
         ];
 
@@ -35,7 +35,7 @@ return Backbone.View.extend({
         var _this = this;
         UL.find(".selectable-link").click(function(e) {
             _this.$el.find(".modal").parent().empty();
-            qed.Router.navigate("#v/" + sectionId + "/" + unitId + "/" + itemId + "/" + $(e.target).data("id"), {trigger: true});
+            this.Router.navigate("#v/" + sectionId + "/" + unitId + "/" + itemId + "/" + $(e.target).data("id"), {trigger: true});
         });
     }
 });

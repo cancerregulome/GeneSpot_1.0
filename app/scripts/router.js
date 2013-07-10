@@ -1,10 +1,10 @@
-define   (['jquery', 'underscore', 'backbone', 'qed',
+define   (['jquery', 'underscore', 'backbone', 'bootstrap',
     'views/topbar_view',
     'views/data_menu',
     'views/data_menu_modal',
     'views/sessions_view'
 ],
-function ( $,        _,            Backbone,    QED,
+function ( $,        _,            Backbone, Bootstrap,
            TopNavBar,
            DataMenuView,
            DataMenuModal,
@@ -28,35 +28,43 @@ return Backbone.Router.extend({
 
     },
 
-    initTopNavBar:function() {
-        var topnavbar = new TopNavBar();
+    initTopNavBar:function(params) {
+        var that = this;
+
+        var topnavbar = new TopNavBar(params);
         $("#navigation-container").append(topnavbar.render().el);
 
-        var section_ids = _.without(_.keys(qed.Datamodel.attributes), "url");
+        var section_ids = _.without(_.keys(this.Datamodel.attributes), "url");
         _.each(section_ids, function(section_id) {
-            var dataMenuView = new DataMenuView({ "section": qed.Datamodel.get(section_id) });
+            var dataMenuView = new DataMenuView({
+                "section": this.Datamodel.get(section_id)
+            });
             $(".data-menu").append(dataMenuView.render().el);
             dataMenuView.on("select-data-item", function(selected) {
-                var modalConfig = _.extend({ sectionId: section_id }, selected);
+                var modalConfig = _.extend({
+                    sectionId: section_id,
+                    Router: that }, selected);
                 var dataMenuModal = new DataMenuModal(modalConfig);
                 $("body").append(dataMenuModal.render().el);
             });
-        });
+        }, this);
 
-        var sessionsView = new SessionsView();
+        var sessionsView = new SessionsView({
+            Router: this
+        });
         this.$el.find(".sessions-container").html(sessionsView.render().el);
     },
 
     loadSessionById: function(sessionId) {
         if (!_.isEmpty(sessionId)) {
-            var selectedSession = _.find(qed.Sessions.All.models, function(m) {
+            var selectedSession = _.find(this.Sessions.All.models, function(m) {
                 return _.isEqual(m.get("id"), sessionId);
             });
             if (selectedSession) {
-                qed.Sessions.Active = selectedSession;
+                this.Sessions.Active = selectedSession;
                 var route = selectedSession.get("route");
                 if (!_.isEmpty(route)) {
-                    qed.Router.navigate(route, {trigger: true});
+                    this.navigate(route, {trigger: true});
                 }
             }
         }
@@ -66,17 +74,37 @@ return Backbone.Router.extend({
         // TODO
     },
 
+    fetchAnnotations: function (dataset_id) {
+        var that = this;
+
+        if (_.isEmpty(this.Annotations[dataset_id])) {
+            var annotations = new this.Models.Annotations({
+                    "url":"svc/data/annotations/" + dataset_id + ".json",
+                    "dataType":"json"}
+            );
+
+            annotations.fetch({
+                "async":false,
+                "dataType":"json",
+                "success":function () {
+                    that.Annotations[dataset_id] = annotations.get("itemsById");
+                }
+            });
+        }
+        return this.Annotations[dataset_id];
+    },
+
     viewsByUri: function(uri, view_name, options) {
         var parts = uri.split("/");
         var data_root = parts[0];
         var analysis_id = parts[1];
         var dataset_id = parts[2];
-        var model_unit = qed.Datamodel.get(data_root)[analysis_id];
+        var model_unit = this.Datamodel.get(data_root)[analysis_id];
         var catalog = model_unit.catalog;
         var catalog_unit = catalog[dataset_id];
         var modelName = catalog_unit.model;
         var serviceUri = catalog_unit.service || model_unit.service || "data/" + uri;
-        var Model = qed.Models[modelName || "Default"];
+        var Model = this.Models[modelName || "Default"];
 
         var model_optns = _.extend(options || {}, {
             "data_uri": "svc/" + serviceUri,
@@ -85,7 +113,8 @@ return Backbone.Router.extend({
             "model_unit": model_unit,
             "catalog_unit": catalog_unit
         });
-        qed.FetchAnnotations(dataset_id);
+
+        this.fetchAnnotations(dataset_id);
 
         var model = new Model(model_optns);
         _.defer(function() {
@@ -99,7 +128,7 @@ return Backbone.Router.extend({
 
         var view_options = _.extend({"model":model}, (model_unit.view_options || {}), (options || {}));
 
-        var ViewClass = qed.Views[view_name];
+        var ViewClass = this.Views[view_name];
         var view = new ViewClass(view_options);
         this.$el.html(view.render().el);
         return view;

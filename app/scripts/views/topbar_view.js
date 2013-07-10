@@ -1,7 +1,7 @@
 define   ([
     'jquery',
     'underscore',
-    'backbone',
+    'bootstrap',
 
     'hbs!templates/topbar',
     'hbs!templates/sign_in_modal',
@@ -12,7 +12,7 @@ define   ([
     'views/cloud_storage_view'
 ],
 
-function ( $, _, Backbone,
+function ( $, _, Bootstrap,
            Template,
            SignInModal,
            HangoutLink,
@@ -42,18 +42,18 @@ return Backbone.View.extend({
         _.defer(this.initHangoutLink);
         _.defer(this.initAboutLinks);
 
-        this.$el.find(".titled").html(qed.Display.get("title") || "QED");
+        this.$el.find(".titled").html(this.Display.get("title") || "AppTemplate");
     },
 
     initHangoutLink: function() {
-        var hangoutUrl = qed.Display.get("hangoutUrl");
+        var hangoutUrl = this.Display.get("hangoutUrl");
         if (hangoutUrl) {
             this.$el.find(".hangout-container").html(HangoutLink({ "url": hangoutUrl }));
         }
     },
 
     initAboutLinks: function() {
-        var aboutLinks = qed.Display.get("aboutLinks") || [];
+        var aboutLinks = this.Display.get("aboutLinks") || [];
         if (!_.isEmpty(aboutLinks)) {
             var UL = this.$el.find(".about-links");
             UL.empty();

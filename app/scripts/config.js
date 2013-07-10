@@ -7,7 +7,7 @@ require.config({
         "jquery-event-drag" : "../bower_components/jquery-event-drag/index",
         "jquery-event-drop" : "../bower_components/jquery-event-drop/index",
         backbone: '../bower_components/backbone/backbone',
-        bootstrap: 'vendor/bootstrap',
+        bootstrap: '../bower_components/bootstrap/js/bootstrap',
         d3: '../bower_components/d3/d3',
         modernizr: '../bower_components/modernizr',
         underscore: '../bower_components/underscore/underscore',
@@ -59,8 +59,6 @@ require.config({
     }
 });
 
-require(['qed', 'router'], function (QED, router) {
+require(['qed'], function (QED) {
     QED.initialize();
-
-    qed = QED;
 });
