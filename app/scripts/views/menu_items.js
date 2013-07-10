@@ -1,6 +1,7 @@
-var LineItemTemplate = require("../templates/line_item");
+define   (['jquery', 'underscore', 'backbone', 'hbs!templates/line_item'],
+function ( $,        _,            Backbone, LineItemTemplate) {
 
-module.exports = Backbone.View.extend({
+return Backbone.View.extend({
 
     initialize:function (options) {
         _.extend(this, options);
@@ -29,4 +30,7 @@ module.exports = Backbone.View.extend({
             });
         }
     }
+});
+
+// end define
 });

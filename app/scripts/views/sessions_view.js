@@ -1,20 +1,24 @@
-var LineItemTemplate = require("../templates/line_item");
-var SessionLabelTemplate = require("../templates/sessions_label");
+define   (['jquery', 'underscore', 'backbone',
+    'hbs!templates/sessions_label',
+    'hbs!templates/line_item'
+],
+function ( $,        _,            Backbone,
+           SessionLabelTemplate,
+           LineItemTemplate) {
 
-module.exports = Backbone.View.extend({
-
+return Backbone.View.extend({
     initialize:function () {
         _.bindAll(this, "loadSession", "loadSessions", "saveNewSession", "saveSession", "getProducerAttributes");
 
         $(document.body).append(SessionLabelTemplate());
 
-        $("a.new-session").live("click", function () {
+        $("a.new-session").on("click", function () {
             $(".sessions-labeler").modal("show");
         });
 
         $(".sessions-labeler button.save-new-session").click(this.saveNewSession);
-        $("a.load-session").live("click", this.loadSession);
-        $("a.save-session").live("click", this.saveSession);
+        $("a.load-session").on("click", this.loadSession);
+        $("a.save-session").on("click", this.saveSession);
 
         qed.Sessions.All.on("add", this.loadSessions);
         this.loadSessions();
@@ -68,4 +72,7 @@ module.exports = Backbone.View.extend({
         });
         return producer_attributes;
     }
+});
+
+// end define
 });

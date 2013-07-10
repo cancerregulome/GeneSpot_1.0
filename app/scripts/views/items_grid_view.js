@@ -1,6 +1,7 @@
-var Template = require("../templates/items_grid");
+define   (['jquery', 'underscore', 'backbone', 'hbs!templates/items_grid'],
+function ( $,        _,            Backbone, Template) {
 
-module.exports = Backbone.View.extend({
+return Backbone.View.extend({
 
     initialize:function (options) {
         _.extend(this, options);
@@ -20,4 +21,7 @@ module.exports = Backbone.View.extend({
 
         this.$el.html(Template({ "headers":headers, "rows":rows }));
     }
+});
+
+// end define
 });

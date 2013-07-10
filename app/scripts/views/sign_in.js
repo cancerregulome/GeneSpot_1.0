@@ -1,6 +1,7 @@
-var Template = require("../templates/sign_in");
+define   (['jquery', 'underscore', 'backbone', 'hbs!templates/sign_in'],
+function ( $,        _,            Backbone, SignInTemplate) {
 
-module.exports = Backbone.View.extend({
+return Backbone.View.extend({
 
     events: {
         "click .signout-link": "signout"
@@ -10,7 +11,7 @@ module.exports = Backbone.View.extend({
         _.extend(this, options);
         _.bindAll(this, "signout");
 
-        this.$el.append(Template(this.provider));
+        this.$el.append(SignInTemplate(this.provider));
 
         if (this.provider.user && this.provider.user.pic) {
             this.$el.find(".user-pic").show();
@@ -38,4 +39,7 @@ module.exports = Backbone.View.extend({
             }
         });
     }
+});
+
+// end define
 });

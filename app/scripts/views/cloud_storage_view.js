@@ -1,6 +1,7 @@
-var Template = require("../templates/modals_cloud_storage");
+define   (['jquery', 'underscore', 'backbone', 'hbs!templates/modals_cloud_storage'],
+function ( $,        _,            Backbone,   Template) {
 
-module.exports = Backbone.View.extend({
+return Backbone.View.extend({
 
     initialize:function (options) {
         _.extend(this, options);
@@ -29,4 +30,7 @@ module.exports = Backbone.View.extend({
     save_session_to_gdrive: function() {
         $(".gdrive-session-modal").modal("show");
     }
+});
+
+// end define
 });

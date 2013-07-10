@@ -1,3 +1,6 @@
+define   (['jquery', 'underscore', 'backbone'],
+function ( $,        _,            Backbone) {
+
 var SessionModel = Backbone.Model.extend({
     "defaults": {
         "label": "Untitled",
@@ -5,7 +8,10 @@ var SessionModel = Backbone.Model.extend({
     }
 });
 
-module.exports = Backbone.Collection.extend({
+return Backbone.Collection.extend({
     model: SessionModel,
     url: "svc/storage/sessions"
+});
+
+// end define
 });

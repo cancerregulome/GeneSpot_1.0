@@ -1,12 +1,18 @@
-var Template = require("../templates/data_menu_modal");
-var LineItemTemplate = require("../templates/line_item");
+define   ([
+    'jquery', 'underscore', 'backbone',
 
-module.exports = Backbone.View.extend({
+    'hbs!templates/data_menu_modal',
+    'hbs!templates/line_item'],
+function ( $,        _,            Backbone,
+           MenuModalTemplate,
+           LineItemTemplate) {
+
+return Backbone.View.extend({
 
     initialize:function (options) {
         _.extend(this, options);
 
-        this.$el.append(Template());
+        this.$el.append(MenuModalTemplate());
 
         var sectionId = this.sectionId;
         var unitId = this.unitId;
@@ -32,5 +38,7 @@ module.exports = Backbone.View.extend({
             qed.Router.navigate("#v/" + sectionId + "/" + unitId + "/" + itemId + "/" + $(e.target).data("id"), {trigger: true});
         });
     }
+});
 
+// end define
 });

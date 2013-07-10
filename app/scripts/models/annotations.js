@@ -1,4 +1,7 @@
-module.exports = Backbone.Model.extend({
+define   (['jquery', 'underscore', 'backbone', 'd3'],
+function ( $,        _,            Backbone, d3) {
+
+return Backbone.Model.extend({
 
     initialize:function (options) {
         _.extend(this, options);
@@ -34,4 +37,7 @@ module.exports = Backbone.Model.extend({
     fetch:function (options) {
         return Backbone.Model.prototype.fetch.call(this, _.extend({dataType: this.get("dataType") || "text"}, options));
     }
+});
+
+// end define
 });

@@ -1,6 +1,7 @@
-var Template = require("../templates/data_dropdown_menu");
+define   (['jquery', 'underscore', 'backbone', 'hbs!templates/data_dropdown_menu'],
+function ( $,        _,            Backbone,   Template) {
 
-module.exports = Backbone.View.extend({
+return Backbone.View.extend({
 
     events:{
         "click .selected-data-item":function (e) {
@@ -31,4 +32,7 @@ module.exports = Backbone.View.extend({
 
         this.$el.append(Template({ "label":this.section.label, "items":_.compact(menus) }));
     }
+});
+
+// end define
 });
