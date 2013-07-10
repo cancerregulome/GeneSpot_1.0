@@ -12,8 +12,8 @@
         "d3": "~3.2.0",
         "jquery-ui": "~1.10.3",
         "jquery-ui-bootstrap": "~0.2.5",
-        "jquery-event-drag-live" : "https://raw.github.com/fimble/jquery.event.drag-drop/master/event.drag/jquery.event.drag.live.js",
-        "jquery-event-drop-live" : "https://raw.github.com/fimble/jquery.event.drag-drop/master/event.drop/jquery.event.drop.live.js",
+        "jquery-event-drag" : "https://raw.github.com/threedubmedia/jquery.threedubmedia/master/event.drag/jquery.event.drag.js",
+        "jquery-event-drop" : "https://raw.github.com/threedubmedia/jquery.threedubmedia/master/event.drop/jquery.event.drop.js"
         "sass-bootstrap": "~2.3.2"
       }
 }
