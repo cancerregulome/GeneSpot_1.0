@@ -14,7 +14,6 @@ results
 
 .idea
 
-proxy.json
 node_modules
 dist
 .tmp
@@ -22,6 +21,5 @@ dist
 app/components
 app/data
 python
-proxy.json
 app/bower_components
 npm-debug.log
