@@ -1,18 +1,14 @@
 {
-    "proxy":[
+    "proxies" : [
         {
-            "url":"/svc/production",
-            "rewrite_url":"http://prod-server.cancerregulome.org",
-            "host":"prod-server.cancerregulome.org",
-            "port":80,
-            "keep_url":true,
-            "comment": "Provides access to remote web services and databases.  Add mappings for different URI namespaces"
-        },
-        {
-            "url":"/svc",
-            "host":"localhost",
-            "port":8000,
-            "comment": "Provides access to services running locally such as configuration files (display.json, datamodel.json)"
+            "context" : "/svc",
+            "host" : "localhost",
+            "port" : 8000,
+            "https" : false,
+            "changeOrigin" : false,
+            "rewrite" : {
+                "^/svc": ""
+            }
         }
     ]
 }
