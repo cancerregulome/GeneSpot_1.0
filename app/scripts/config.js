@@ -4,6 +4,8 @@ require.config({
     paths: {
         jquery: '../bower_components/jquery/jquery',
         "jQuery-ui": "../bower_components/jquery-ui/ui/jquery-ui",
+        "jquery-event-drag" : "../bower_components/jquery-event-drag/index",
+        "jquery-event-drop" : "../bower_components/jquery-event-drop/index",
         backbone: '../bower_components/backbone/backbone',
         bootstrap: 'vendor/bootstrap',
         d3: '../bower_components/d3/d3',
@@ -20,6 +22,14 @@ require.config({
             'exports' : '_'
         },
         "jQuery-ui" : {
+            "deps": ["jquery"],
+            "exports" : "$"
+        },
+        "jquery-event-drag" : {
+            "deps": ["jquery"],
+            "exports" : "$"
+        },
+        "jquery-event-drop" : {
             "deps": ["jquery"],
             "exports" : "$"
         },
@@ -50,9 +60,7 @@ require.config({
 });
 
 require(['qed', 'router'], function (QED, router) {
-    // 'use strict';
+    QED.initialize();
 
     qed = QED;
-    var r = new router();
-    r.initialize();
 });

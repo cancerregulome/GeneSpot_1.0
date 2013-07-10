@@ -1,13 +1,27 @@
-var Template = require("../templates/topbar");
-var SignInModal = require("../templates/sign_in_modal");
-var HangoutLink = require("../templates/hangout_link");
-var AboutLink = require("../templates/about_link");
+define   ([
+    'jquery',
+    'underscore',
+    'backbone',
 
-var SignInView = require("./sign_in");
-var SessionsView = require("./sessions_view");
-var CloudStorageView = require("./cloud_storage_view");
+    'hbs!templates/topbar',
+    'hbs!templates/sign_in_modal',
+    'hbs!templates/hangout_link',
+    'hbs!templates/about_link',
 
-module.exports = Backbone.View.extend({
+    'views/sign_in',
+    'views/cloud_storage_view'
+],
+
+function ( $, _, Backbone,
+           Template,
+           SignInModal,
+           HangoutLink,
+           AboutLink,
+           SignInView,
+           CloudStorageView
+    ) {
+
+return Backbone.View.extend({
     events:{
         "click .signin": function() {
             this.$signInModal.modal("toggle");
@@ -29,9 +43,6 @@ module.exports = Backbone.View.extend({
         _.defer(this.initAboutLinks);
 
         this.$el.find(".titled").html(qed.Display.get("title") || "QED");
-
-        var sessionsView = new SessionsView();
-        this.$el.find(".sessions-container").html(sessionsView.render().el);
     },
 
     initHangoutLink: function() {
@@ -99,4 +110,7 @@ module.exports = Backbone.View.extend({
 
         $.ajax({ url:"svc/auth/whoami", method:"GET", context:this, success:addAuthProviders });
     }
+});
+
+// end define
 });

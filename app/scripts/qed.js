@@ -1,11 +1,30 @@
-$(function () {
-    qed = {
+define   (['jquery', 'underscore', 'backbone', 'router',
+    'models/sessions',
+    'models/catalog',
+    'models/annotations',
+    'models/mappings',
+    'models/feature_matrix',
+
+    'views/items_grid_view'],
+function ( $,        _,            Backbone,   QEDRouter,
+           SessionsCollection,
+           CatalogModel,
+           AnnotationsModel,
+           MappingsModel,
+           FeatureMatrixModel,
+
+           ItemGridView
+    ) {
+
+    var obj = {
         Events: _.extend(Backbone.Events),
+
+        Annotations: {},
         Models:{
-            "Catalogs":require("models/catalog"),
-            "Annotations":require("models/annotations"),
-            "Mappings":require("models/mappings"),
-            "FeatureMatrix":require("models/feature_matrix"),
+            "Catalogs": CatalogModel,
+            "Annotations": AnnotationsModel,
+            "Mappings": MappingsModel,
+            "FeatureMatrix": FeatureMatrixModel,
             "Default":Backbone.Model.extend({
                 url: function() {
                     return this.get("data_uri");
@@ -21,9 +40,10 @@ $(function () {
             ]
         },
         Views:{
-            "items_grid": require("views/items_grid_view")
+            "items_grid": ItemGridView
         },
         Lookups:{
+            Chromosomes: new AnnotationsModel({ url:"svc/data/lookups/chromosomes" }),
             Labels:{}
         },
         Display:new Backbone.Model(),
@@ -35,79 +55,99 @@ $(function () {
         }
     };
 
-    qed.Display.fetch({
-        url:"svc/configurations/display.json",
-        success:function () {
-            document.title = (qed.Display.get("title") || "QED");
-        }
-    });
+    obj.FetchAnnotations = function (dataset_id) {
+        var that = this;
 
-    var startRouter = function() {
-        var QEDRouter = require("./router");
-        qed.Router = new QEDRouter();
-        qed.Router.initTopNavBar();
+        if (_.isEmpty(this.Annotations[dataset_id])) {
+            var annotations = new this.Models.Annotations({
+                "url":"svc/data/annotations/" + dataset_id + ".json",
+                "dataType":"json"}
+            );
 
-        Backbone.history.start();
-        qed.Events.trigger("ready");
-    };
-
-    var startupUI = function() {
-        var SessionsCollection = require("models/sessions");
-        $.ajax({
-            "url": "svc/storage/sessions",
-            "method": "GET",
-            success: function(json) {
-                qed.Sessions.All = new SessionsCollection(json.items);
-                startRouter();
-            },
-            error: function() {
-                qed.Sessions.All = new SessionsCollection([]);
-                startRouter();
-            }
-        });
-    };
-
-    qed.Datamodel.fetch({
-        url:"svc/configuration/datamodel.json",
-        success:function () {
-            var section_ids = _.without(_.keys(qed.Datamodel.attributes), "url");
-            var catalog_counts = _.map(section_ids, function (section_id) {
-                var section = qed.Datamodel.get(section_id);
-                return _.without(_.keys(section), "label").length;
-            });
-
-            var allCatalogs = _.reduce(_.flatten(catalog_counts), function (sum, next) {
-                return sum + next;
-            });
-
-            var initLayoutFn = _.after(allCatalogs, startupUI);
-            _.each(section_ids, function (section_id) {
-                _.each(qed.Datamodel.get(section_id), function (unit, unit_id) {
-                    if (unit_id != "label") {
-                        var catalog = new qed.Models.Catalogs({"url":"svc/data/" + section_id + "/" + unit_id + "/CATALOG", "unit":unit});
-                        catalog.fetch({ success:initLayoutFn, error:initLayoutFn });
-                    }
-                });
-            });
-        },
-        error: startupUI
-    });
-
-    qed.Lookups.Chromosomes = new qed.Models.Annotations({ url:"svc/data/lookups/chromosomes" });
-    qed.Lookups.Chromosomes.fetch({"dataType":"text"});
-
-    qed.Annotations = {};
-    qed.FetchAnnotations = function (dataset_id) {
-        if (_.isEmpty(qed.Annotations[dataset_id])) {
-            var annotations = new qed.Models.Annotations({"url":"svc/data/annotations/" + dataset_id + ".json", "dataType":"json"});
             annotations.fetch({
                 "async":false,
                 "dataType":"json",
                 "success":function () {
-                    qed.Annotations[dataset_id] = annotations.get("itemsById");
+                    that.Annotations[dataset_id] = annotations.get("itemsById");
                 }
             });
         }
-        return qed.Annotations[dataset_id];
+        return this.Annotations[dataset_id];
     };
+
+    obj.startRouter = function() {
+        this.Router = new QEDRouter();
+        this.Router.initTopNavBar();
+
+        Backbone.history.start();
+        this.Events.trigger("ready");
+    };
+
+    obj.startupUI = function() {
+        var that = this;
+
+        $.ajax({
+            "url": "svc/storage/sessions",
+            "method": "GET",
+            success: function(json) {
+                that.Sessions.All = new SessionsCollection(json.items);
+                that.startRouter();
+            },
+            error: function() {
+                that.Sessions.All = new SessionsCollection([]);
+                that.startRouter();
+            }
+        });
+    };
+
+    obj.initialize = function() {
+        var that = this;
+
+        this.Display.fetch({
+            url:"svc/configurations/display.json",
+            success:function () {
+                document.title = (that.Display.get("title") || "QED");
+            }
+        });
+
+        this.Datamodel.fetch({
+            url:"svc/configurations/datamodel.json",
+            success:function () {
+                var section_ids = _.without(_.keys(that.Datamodel.attributes), "url");
+                var catalog_counts = _.map(section_ids, function (section_id) {
+                    var section = that.Datamodel.get(section_id);
+                    return _.without(_.keys(section), "label").length;
+                });
+
+                var allCatalogs = _.reduce(_.flatten(catalog_counts), function (sum, next) {
+                    return sum + next;
+                });
+
+                var initLayoutFn = _.after(allCatalogs, that.startupUI);
+
+                _.each(section_ids, function (section_id) {
+                    _.each(that.Datamodel.get(section_id), function (unit, unit_id) {
+                        if (unit_id != "label") {
+                            var catalog = new that.Models.Catalogs({"url":"svc/data/" + section_id + "/" + unit_id + "/CATALOG", "unit":unit});
+                            catalog.fetch({
+                                success:initLayoutFn,
+                                error:initLayoutFn
+                            });
+                        }
+                    });
+                });
+            },
+            error: that.startupUI
+        });
+
+        this.Lookups.Chromosomes.fetch({
+            dataType: "text"
+        });
+    };
+
+    _.bindAll(obj, 'FetchAnnotations', 'startRouter', 'startupUI', 'initialize');
+
+    return obj;
+
+// end define
 });

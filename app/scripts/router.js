@@ -1,4 +1,16 @@
-module.exports = Backbone.Router.extend({
+define   (['jquery', 'underscore', 'backbone', 'qed',
+    'views/topbar_view',
+    'views/data_menu',
+    'views/data_menu_modal',
+    'views/sessions_view'
+],
+function ( $,        _,            Backbone,    QED,
+           TopNavBar,
+           DataMenuView,
+           DataMenuModal,
+           SessionsView) {
+
+return Backbone.Router.extend({
     targetEl: "#mainDiv",
     routes:{
         "":"home_view",
@@ -13,25 +25,26 @@ module.exports = Backbone.Router.extend({
     },
 
     views: {
+
     },
 
     initTopNavBar:function() {
-        var TopNavBar = require("views/topbar_view");
         var topnavbar = new TopNavBar();
         $("#navigation-container").append(topnavbar.render().el);
 
-        var DataMenuView = require("../views/data_menu");
         var section_ids = _.without(_.keys(qed.Datamodel.attributes), "url");
         _.each(section_ids, function(section_id) {
             var dataMenuView = new DataMenuView({ "section": qed.Datamodel.get(section_id) });
             $(".data-menu").append(dataMenuView.render().el);
             dataMenuView.on("select-data-item", function(selected) {
                 var modalConfig = _.extend({ sectionId: section_id }, selected);
-                var DataMenuModal = require("../views/data_menu_modal");
                 var dataMenuModal = new DataMenuModal(modalConfig);
                 $("body").append(dataMenuModal.render().el);
             });
         });
+
+        var sessionsView = new SessionsView();
+        this.$el.find(".sessions-container").html(sessionsView.render().el);
     },
 
     loadSessionById: function(sessionId) {
@@ -91,4 +104,7 @@ module.exports = Backbone.Router.extend({
         this.$el.html(view.render().el);
         return view;
     }
+});
+
+// end define
 });
