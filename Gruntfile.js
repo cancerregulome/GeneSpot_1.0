@@ -31,18 +31,6 @@ module.exports = function (grunt) {
             options: {
                 nospawn: true
             },
-            coffee: {
-                files: ['<%= yeoman.app %>/scripts/{,*/}*.coffee'],
-                tasks: ['coffee:dist']
-            },
-            coffeeTest: {
-                files: ['test/spec/{,*/}*.coffee'],
-                tasks: ['coffee:test']
-            },
-            compass: {
-                files: ['<%= yeoman.app %>/css/{,*/}*.{scss,sass}'],
-                tasks: ['compass:server']
-            },
             livereload: {
                 options: {
                     livereload: LIVERELOAD_PORT
@@ -133,51 +121,6 @@ module.exports = function (grunt) {
                 }
             }
         },
-        coffee: {
-            dist: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: '<%= yeoman.app %>/scripts',
-                        src: '{,*/}*.coffee',
-                        dest: '.tmp/scripts',
-                        ext: '.js'
-                    }
-                ]
-            },
-            test: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: 'test/spec',
-                        src: '{,*/}*.coffee',
-                        dest: '.tmp/spec',
-                        ext: '.js'
-                    }
-                ]
-            }
-        },
-        compass: {
-            options: {
-                sassDir: '<%= yeoman.app %>/css',
-                cssDir: '.tmp/css',
-                generatedImagesDir: '.tmp/images/generated',
-                imagesDir: '<%= yeoman.app %>/images',
-                javascriptsDir: '<%= yeoman.app %>/scripts',
-                fontsDir: '<%= yeoman.app %>/css/fonts',
-                importPath: '<%= yeoman.app %>/bower_components',
-                httpImagesPath: '/images',
-                httpGeneratedImagesPath: '/images/generated',
-                httpFontsPath: '/css/fonts',
-                relativeAssets: false
-            },
-            dist: {},
-            server: {
-                options: {
-                    debugInfo: true
-                }
-            }
-        },
         // not used since Uglify task does concat,
         // but still available if needed
         //       concat: {
@@ -213,7 +156,7 @@ module.exports = function (grunt) {
                     src: [
                         '<%= yeoman.dist %>/scripts/{,*/}*.js',
                         '<%= yeoman.dist %>/css/{,*/}*.css',
-                        '<%= yeoman.dist %>/images/{,*/}*.{png,jpg,jpeg,gif,webp}',
+        //                '<%= yeoman.dist %>/images/{,*/}*.{png,jpg,jpeg,gif,webp}',
                         '<%= yeoman.dist %>/css/fonts/*'
                     ]
                 }
@@ -319,16 +262,10 @@ module.exports = function (grunt) {
         },
         concurrent: {
             server: [
-                'coffee:dist',
-                'compass:server'
             ],
             test: [
-                'coffee',
-                'compass'
             ],
             dist: [
-                'coffee',
-                'compass:dist',
                 'imagemin',
                 'svgmin',
                 'htmlmin'
