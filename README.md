@@ -13,44 +13,8 @@ rapid prototyping.
 > We will work to ensure that this template supports mobile devices and tablets using HTML5 web browsers.  But
 > we will focus our testing efforts to the most commonly-used platforms: iOS and Android.
 
-# Build Dependencies #
-* NodeJS Package Manager (npm) - https://npmjs.org
-
-* Brunch - http://brunch.io/
-
-```bash
-npm install -g brunch
-```
-
-# Web Server Dependencies #
-* NGINX - http://wiki.nginx.org/Install
-
-> **npm** is the recommended web development server
-
-```bash
-cd $WEBAPP_ROOT
-npm install // creates node_modules includes all web server dependencies
-npm start // starts dev web server at http://localhost:3333
-```
-
 # Web Services #
 * This template is meant to be used in conjunction with https://github.com/cancerregulome/OAuthWebServices
-
-# JavaScript Dependencies #
-This template packages third-party JavaScript libraries into a single **vendor.js** file.  Our preferred libraries are
-bundled here (todo: add link).  Developers should download these into their development and production environments
-(**app_root/vendor** directory), and the build system will automatically integrate them (see **app_root/_public**).
-Additional libraries may be dropped into the **vendor** directory at runtime.
-
-> These third-party JavaScript libraries, as well as the build directories (**vendor**, **node_modules**, **_public**)
-> **SHOULD NOT** be checked-in to individual project repositories.
-
-### Required JavaScript Libraries ###
-  * Backbone.js -> Data model
-  * Underscore.js -> Data structure utilities
-  * d3.js -> Visualizations
-  * jQuery -> UI, DOM manipulation, effects
-  * Bootstrap.js -> UI style and structure
 
 # Application Configuration #
 > Configuration files **SHOULD NOT** be checked-in to individual project repositories.
@@ -72,7 +36,7 @@ This template specifies the following configuration files (see examples in **app
 | web_configs | Directory containing **display.json** and **datamodel.json** (see below) | /local/webapps/MyWebApp/configurations |
 
 ## display.json ##
- * Location:  specified in **tornado.config** (see above)
+ * Location: specified in **tornado.config** (see above)
  * Specifies identifying UI elements (e.g. titles, links in the About menu)
  * Specifies links to Hangout URL
 
@@ -144,9 +108,7 @@ This template specifies the following configuration files (see examples in **app
 
 # Initial Dev Setup #
 1. Clone this repository
-2. Install Required Dependencies (see above, link)
-3. Download Third-Party JavaScript libraries and extract into root directory
-4. Execute ```npm install```
-5. Execute ```npm start```
-6. Start web services (see https://github.com/cancerregulome/OAuthWebServices)
-6. Open browser at http://localhost:3333
+2. Install required dependencies (see https://github.com/cancerregulome/WebAppBase/blob/master/INSTALL.md)
+3. Start web services (see https://github.com/cancerregulome/OAuthWebServices)
+4. Execute ```grunt server &```
+5. Open browser at http://localhost:9010
