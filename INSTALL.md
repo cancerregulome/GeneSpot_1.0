@@ -1,38 +1,59 @@
 # WebAppBase
 
-# Install tools, libraries, and dependencies:
+# Dependencies
 
-1. [Node.js v0.10.13 or newer](http://www.nodejs.org) - Works best with Linux and Mac.  Windows is good and getting better.
+* [Node.js v0.10.13](http://www.nodejs.org) or newer
+* [Git](http://git-scm.com/)
+ 
+# Installing dependencies:
 
-2. To install global tools, you can use *sudo* or you can change the install path for node libraries to a file path in user space:
-```
-export NODE_PATH=$HOME/.node
-export PATH=$NODE_PATH:$PATH
-```
+## Linux and OSX
 
-3. Using *npm*, the node package manager, globally install the core build tools, yeoman, grunt, and bower:
-```
-cd /path/to/project
-npm install -g yo grunt-cli bower
-```
+1. Install [Node.js](http://www.nodejs.org).
+2. Install [Git](http://git-scm.com/).
+3. To install global tools, you can use *sudo* or you can change the install path for node libraries to a file path in user space:
 
-4. Now install the build and test dependencies:
-```
-cd /path/to/project
-npm install
-```
+  ```
+  export NODE_PATH=$HOME/.node
+  export PATH=$NODE_PATH:$PATH
+  ```
 
-This downloads and install node dependencies listed in package.json to the `node_modules` subdirectory
+## Windows
 
-5. Install the client-side dependencies using bower:
-```
-cd /path/to/project
-bower install
-```
+1. Install the pre-built Node.js package from http://www.nodejs.org.
+2. Add the Node.js installation directory to the executable search path so that the *npm* program is runnable from shell.
+3. Install [Git](http://git-scm.com/).
+4. Add the directory containing the *git* program to the executable search path so that the program is runnable from shell.
 
-# Build the project:
+# Installing build tools and libraries
 
-The web application is built by using grunt:
+1. Using *npm*, the node package manager, globally install the core build tools, yeoman, grunt, and bower:
+
+  ```
+  cd /path/to/project
+  npm install -g yo grunt-cli bower
+  ```
+
+2. Now install the build and test dependencies:
+
+  ```
+  cd /path/to/project
+  npm install
+  ```
+
+  This downloads and install node dependencies listed in package.json to the `node_modules` subdirectory
+
+3. Install the client-side dependencies using *bower*:
+
+  ```
+  cd /path/to/project
+  bower install
+  ```
+
+# Building the project:
+
+The web application is built by using *grunt*:
+
 ```
 grunt build
 ```
@@ -42,6 +63,7 @@ The entire static package should be created in the `dist` subdirectory.  This di
 # Developing the project:
 
 The web application can be served while in development with:
+
 ```
 grunt server &
 ```
