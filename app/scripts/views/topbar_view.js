@@ -104,7 +104,7 @@ return Backbone.View.extend({
             });
         });
 
-        this.$el.ajaxError(function(event, request) {
+        $(document).ajaxError(function(event, request) {
             if (request.status == 403) signInProcessStart();
         });
 
