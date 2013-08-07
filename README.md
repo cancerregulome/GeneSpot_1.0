@@ -13,9 +13,6 @@ rapid prototyping.
 > We will work to ensure that this template supports mobile devices and tablets using HTML5 web browsers.  But
 > we will focus our testing efforts to the most commonly-used platforms: iOS and Android.
 
-# Web Services #
-* This template is meant to be used in conjunction with https://github.com/cancerregulome/OAuthWebServices
-
 # Application Configuration #
 > Configuration files **SHOULD NOT** be checked-in to individual project repositories.
 
@@ -31,12 +28,13 @@ This template specifies the following configuration files (see examples in **app
   * Provides information to NGINX web server
   * Configures remote and local proxies to web services
 
-| Property | Description | Example |
-| --- | --- | --- |
-| web_configs | Directory containing **display.json** and **datamodel.json** (see below) | /local/webapps/MyWebApp/configurations |
+Runtime Configuration
+-----
+* This template is meant to be used in conjunction with https://github.com/cancerregulome/OAuthWebServices
+* The following files are served through the /svc/configurations base URI
 
 ## display.json ##
- * Location: specified in **tornado.config** (see above)
+ * Location: web services configurations path
  * Specifies identifying UI elements (e.g. titles, links in the About menu)
  * Specifies links to Hangout URL
 
@@ -55,7 +53,7 @@ This template specifies the following configuration files (see examples in **app
 ```
 
 ## datamodel.json ##
- * Location:  specified in **tornado.config** (see above)
+ * Location: web services configurations path
  * Specifies data source elements such as files, directories, and data services available to the application
  * Includes information such as labels and data types
 
