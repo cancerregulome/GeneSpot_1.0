@@ -12,7 +12,11 @@ return Backbone.View.extend({
     initialize:function (options) {
         _.extend(this, options);
 
-        this.$el.append(MenuModalTemplate());
+        this.renderData();
+    },
+
+    renderData: function() {
+        this.$el.html(MenuModalTemplate());
 
         var sectionId = this.sectionId;
         var unitId = this.unitId;
@@ -34,10 +38,15 @@ return Backbone.View.extend({
 
         var _this = this;
         UL.find(".selectable-link").click(function(e) {
-            _this.$el.find(".modal").parent().empty();
-            this.Router.navigate("#v/" + sectionId + "/" + unitId + "/" + itemId + "/" + $(e.target).data("id"), {trigger: true});
+            _this.$el.modal('hide');
+            _this.Router.navigate("#v/" + sectionId + "/" + unitId + "/" + itemId + "/" + $(e.target).data("id"), {trigger: true});
         });
+
+        this.$el.modal('show');
+
+        return this;
     }
+
 });
 
 // end define

@@ -44,9 +44,10 @@ return Backbone.Router.extend({
             dataMenuView.on("select-data-item", function(selected) {
                 var modalConfig = _.extend({
                     sectionId: section_id,
-                    Router: that }, selected);
+                    Router: that,
+                    el: $("#modal-container")
+                }, selected);
                 var dataMenuModal = new DataMenuModal(modalConfig);
-                $("body").append(dataMenuModal.render().el);
             });
         }, this);
 
