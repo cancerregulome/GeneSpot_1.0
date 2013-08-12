@@ -37,9 +37,10 @@ return Backbone.Router.extend({
         var section_ids = _.without(_.keys(this.Datamodel.attributes), "url");
         _.each(section_ids, function(section_id) {
             var dataMenuView = new DataMenuView({
-                "section": this.Datamodel.get(section_id)
+                "section": this.Datamodel.get(section_id),
+                className: "data-menu dropdown-menu"
             });
-            $(".data-menu").append(dataMenuView.render().el);
+            $(".data-dropdown").append(dataMenuView.render().el);
             dataMenuView.on("select-data-item", function(selected) {
                 var modalConfig = _.extend({
                     sectionId: section_id,
