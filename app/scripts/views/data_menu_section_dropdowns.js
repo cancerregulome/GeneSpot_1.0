@@ -2,8 +2,6 @@ define   (['jquery', 'underscore', 'backbone', 'hbs!templates/data_dropdown_menu
 function ( $,        _,            Backbone,   Template) {
 
 return Backbone.View.extend({
-    tagName: 'ul',
-
     events:{
         "click .selected-data-item":function (e) {
             this.trigger("select-data-item", {
