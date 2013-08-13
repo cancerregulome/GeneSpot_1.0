@@ -24,22 +24,19 @@ return Backbone.View.extend({
 
             that.$el.append($section_header_el);
 
-            var dataMenuView = new DataMenuDropdownsView({
+            var dropdownSubMenuView = new DataMenuDropdownsView({
                 section: section.data,
                 el: that.$el
             });
 
             // Render the dropdowns for each section. The dropdown menu elements
             // are appended to the element of this view inside the render-method.
-            dataMenuView.render();
+            dropdownSubMenuView.render();
 
-            dataMenuView.on("select-data-item", function(selected) {
-                var modalConfig = _.extend({
-                    sectionId: section.id,
-                    Router: that.Router,
-                    el: $("#modal-container")
-                }, selected);
-                new DataMenuModal(modalConfig);
+            dropdownSubMenuView.on("select-data-item", function(selected) {
+                that.trigger("select-data-item", _.extend({
+                    sectionId: section.id
+                }, selected));
             });
         });
 
