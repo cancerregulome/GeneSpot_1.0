@@ -36,7 +36,7 @@ return Backbone.Router.extend({
 
         var section_ids = _.without(_.keys(this.Datamodel.attributes), "url");
 
-        var dataSectionsView = new DataMenuSections({
+        var dataMenuSectionsView = new DataMenuSections({
             sections: _.map(section_ids, function(section_id) {
                 return {
                     data: that.Datamodel.get(section_id),
@@ -46,7 +46,16 @@ return Backbone.Router.extend({
             Router: this
         });
 
-        $(".data-dropdown").append(dataSectionsView.render().el);
+        dataMenuSectionsView.on("select-data-item", function(selected) {
+            var modalConfig = _.extend({
+                Router: that,
+                el: $("#modal-container")
+            }, selected);
+
+            new DataMenuModal(modalConfig);
+        });
+
+        $(".data-dropdown").append(dataMenuSectionsView.render().el);
 
         var sessionsView = new SessionsView({
             Router: this
