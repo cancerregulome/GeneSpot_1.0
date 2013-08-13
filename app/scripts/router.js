@@ -1,13 +1,13 @@
 define   (['jquery', 'underscore', 'backbone', 'bootstrap',
     'views/topbar_view',
-    'views/data_menu',
     'views/data_menu_modal',
+    'views/data_menu_sections',
     'views/sessions_view'
 ],
 function ( $,        _,            Backbone, Bootstrap,
            TopNavBar,
-           DataMenuView,
            DataMenuModal,
+           DataMenuSections,
            SessionsView) {
 
 return Backbone.Router.extend({
@@ -35,21 +35,18 @@ return Backbone.Router.extend({
         $("#navigation-container").append(topnavbar.render().el);
 
         var section_ids = _.without(_.keys(this.Datamodel.attributes), "url");
-        _.each(section_ids, function(section_id) {
-            var dataMenuView = new DataMenuView({
-                "section": this.Datamodel.get(section_id),
-                className: "data-menu dropdown-menu"
-            });
-            $(".data-dropdown").append(dataMenuView.render().el);
-            dataMenuView.on("select-data-item", function(selected) {
-                var modalConfig = _.extend({
-                    sectionId: section_id,
-                    Router: that,
-                    el: $("#modal-container")
-                }, selected);
-                var dataMenuModal = new DataMenuModal(modalConfig);
-            });
-        }, this);
+
+        var dataSectionsView = new DataMenuSections({
+            sections: _.map(section_ids, function(section_id) {
+                return {
+                    data: that.Datamodel.get(section_id),
+                    id: section_id
+                };
+            }),
+            Router: this
+        });
+
+        $(".data-dropdown").append(dataSectionsView.render().el);
 
         var sessionsView = new SessionsView({
             Router: this
