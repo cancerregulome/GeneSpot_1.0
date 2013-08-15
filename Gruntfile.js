@@ -258,6 +258,16 @@ module.exports = function (grunt) {
                         ]
                     }
                 ]
+            },
+            builddebug: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= yeoman.app %>',
+                        dest: '<%= yeoman.dist %>',
+                        src: 'bower_components/requirejs/require.js'
+                    }
+                ]
             }
         },
         concurrent: {
@@ -303,18 +313,40 @@ module.exports = function (grunt) {
         'mocha'
     ]);
 
-    grunt.registerTask('build', [
-        'clean:dist',
-        'useminPrepare',
-        'concurrent:dist',
-        'requirejs',
-        'concat',
-        'cssmin',
-        'uglify',
-        'copy',
-        'rev',
-        'usemin'
-    ]);
+    grunt.registerTask('build', function(target) {
+        if (target === undefined) {
+            return grunt.task.run([
+                'clean:dist',
+                'useminPrepare',
+                'concurrent:dist',
+                'requirejs',
+                'concat',
+                'cssmin',
+                'uglify',
+                'copy:dist',
+                'rev',
+                'usemin'
+            ]);
+        }
+        else if (target == 'debug') {
+            return grunt.task.run([
+                'clean:dist',
+                'useminPrepare',
+                'concurrent:dist',
+                'requirejs',
+                'concat',
+                'copy:dist',
+                'rev',
+                'usemin',
+                // Copy require.js to the build directory, as the 'uglify' task is not included
+                // in the debug target.
+                'copy:builddebug'
+            ]);
+        }
+        else {
+            return grunt.log.warn("Unknown build target \'" + target + "\', quitting.");
+        }
+    });
 
     grunt.registerTask('default', [
         'jshint',
