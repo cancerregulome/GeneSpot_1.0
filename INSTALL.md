@@ -47,6 +47,12 @@
 grunt build
 ```
 
+> Alternative to generate un-minified, un-uglified JavaScript code (@TODO: source maps)
+
+```
+grunt build:debug
+```
+
 ### Starting the application (with Grunt) 
 > This serves the web app locally, opens a browser pointed at the local web server, and opens a watch task that 
 > reloads the browser automatically when core files (html, css, js) are modified.  It does not build the web app for 
