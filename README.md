@@ -16,11 +16,11 @@ supports rapid prototyping.
 
 Initial Dev Setup
 -----
-1. Clone this repository
-2. Install required dependencies (see https://github.com/cancerregulome/WebAppBase/blob/master/INSTALL.md)
-3. Start web services (see https://github.com/cancerregulome/OAuthWebServices)
+1. Clone this repository (@TODO : use submodules)
+2. Complete [Installation Guide](https://github.com/cancerregulome/WebAppBase/blob/master/INSTALL.md) instructions 
+3. Install [OAUTH Web Services](https://github.com/cancerregulome/OAuthWebServices)
 4. Execute ```grunt server &```
-5. Open browser at http://localhost:9010
+5. Open browser at [http://localhost:9010](http://localhost:9010)
 
 Runtime Configuration
 -----
