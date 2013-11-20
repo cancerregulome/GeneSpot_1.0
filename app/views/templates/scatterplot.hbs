@@ -17,19 +17,21 @@
         visibility: hidden;
     }
 
-    .y.axis path, .y.axis line {
-        stroke: #aaa;
+    .y.axis path, .y.axis line{
+        stroke:#aaa;
     }
 
     .x.axis path, .x.axis line {
-        stroke: none;
+        stroke:none;
     }
 
     .axis_label, .ticks {
-        font-size: 16px;
+        font-size:16px;
     }
 
     .data_totals {
+        font-size: 20px;
+        font-weight: 400;
         shape-rendering: crispEdges;
     }
 
@@ -38,7 +40,7 @@
         font-weight: bold;
     }
 
-    .splitiscope {
+    .cv {
         width: 540px;
         height: 405px;
     }
@@ -54,19 +56,19 @@
                         <span class="add-on">x-axis</span>
                         <input class="input-small genes-typeahead-x span2" type="text" placeholder="Type a gene name (x-axis) ...">
                     </div>
-                    <ul class="unstyled feature-selector-x pre-scrollable">Loading features...</ul>
+                    <ul class="nav nav-list feature-selector-x pre-scrollable">Loading features...</ul>
                 </div>
                 <div class="span3">
                     <div class="input-prepend">
                         <span class="add-on">y-axis</span>
                         <input class="input-small genes-typeahead-y span2" type="text" placeholder="Type a gene name (y-axis) ...">
                     </div>
-                    <ul class="unstyled feature-selector-y pre-scrollable">Loading features...</ul>
+                    <ul class="nav nav-list feature-selector-y pre-scrollable">Loading features...</ul>
                 </div>
             </div>
         </div>
         <div class="span5">
-            <div class="scatterplot-container">Loading data...</div>
+            <div class="scatterplot-container"></div>
             <div class="download-container"></div>
         </div>
     </div>

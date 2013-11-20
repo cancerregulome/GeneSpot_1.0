@@ -3,9 +3,10 @@ var LineItemTemplate = require("./templates/line_item");
 var DataUriTemplate = require("./templates/data_uri");
 
 module.exports = Backbone.View.extend({
-    current_cancer: null,
+    selected_tumor_types: [],
     selected_genes: { "x": "TP53", "y": "KRAS" },
     selected_features: { "x": null, "y": null },
+    colorsByTumorType: {},
 
     events: {
         "click .hide-controls": function() {
@@ -30,11 +31,33 @@ module.exports = Backbone.View.extend({
         if (_.isEmpty(this.cancers)) {
             $.ajax({ url: "svc/data/lookups/cancers", type: "GET", dataType: "text", success: this.initCancerSelector });
         } else {
-            this.current_cancer = _.first(this.cancers);
+            this.selected_tumor_types = this.cancers;
+            this.initColorMaps();
             this.initCancerSelector(this.cancers.join("\n"));
         }
 
+        this.initGraph();
+
         this.model.on("load", this.loadData);
+    },
+
+    initColorMaps: function() {
+        if (qed.Display) {
+            var colormaps = qed.Display.get("colormaps") || {};
+            if (_.has(colormaps, "tumor_types")) {
+                this.colorsByTumorType = colormaps["tumor_types"];
+                return;
+            }
+        }
+
+        var colorscaleFn = d3.scale.ordinal().domain(this.selected_tumor_types)
+            .range(d3.range(this.selected_tumor_types.length)
+            .map(d3.scale.linear().domain([0, this.selected_tumor_types.length - 1])
+            .range(["red", "green"])
+            .interpolate(d3.interpolateLab)));
+        _.each(this.selected_tumor_types, function(tumor_type) {
+            this.colorsByTumorType[tumor_type] = colorscaleFn(tumor_type);
+        }, this);
     },
 
     initCancerSelector: function (txt) {
@@ -42,18 +65,31 @@ module.exports = Backbone.View.extend({
         var _this = this;
         _.each(cancers, function (cancer, idx) {
             cancer = cancer.trim();
-            if (_.isEqual(_this.current_cancer, cancer)) {
+            if (this.selected_tumor_types.indexOf(cancer) >= 0) {
                 _this.$el.find(".cancer-selector-scatterplot").append(LineItemTemplate({"li_class": "active", "a_class": "toggle-active", "id": cancer, "label": cancer}));
             } else {
                 _this.$el.find(".cancer-selector-scatterplot").append(LineItemTemplate({"a_class": "toggle-active", "id": cancer, "label": cancer}));
             }
-        });
+        }, this);
 
+        _.each(this.$el.find(".cancer-selector-scatterplot").find(".toggle-active"), function(liactive) {
+            $(liactive).css({
+                "border-bottom": "10px solid " + this.colorsByTumorType[$(liactive).data("id")]
+            });
+        }, this);
         this.$el.find(".cancer-selector-scatterplot").find(".toggle-active").click(function (e) {
-            _this.$el.find(".cancer-selector-scatterplot").find(".active").removeClass("active");
-            $(e.target).parent().addClass("active");
-            _this.current_cancer = $(e.target).data("id");
-            _.defer(_this.reloadModel);
+            $(e.target).parent().toggleClass("active");
+            _this.selected_tumor_types = _.map(_this.$el.find(".cancer-selector-scatterplot").find(".active").find(".toggle-active"), function(liactive) {
+                return $(liactive).data("id");
+            });
+            _.defer(_this.loadData);
+        });
+        this.$el.find(".cancer-selector-scatterplot").find(".toggle-active").hover(function (e) {
+            if ($(e.target).parent().hasClass("active")) {
+                _this.carve.highlight($(e.target).data("id")).render();
+            }
+        }, function(e) {
+            _this.carve.highlight("").render();
         });
     },
 
@@ -92,14 +128,18 @@ module.exports = Backbone.View.extend({
     },
 
     loadData: function () {
+        this.$el.find(".download-container").empty();
         this.feature_map = _.groupBy(this.model.get("items"), "id");
-        this.initFeatureLabelSelector();
-        this.drawGraph();
+        _.defer(this.initFeatureLabelSelector);
+        _.defer(this.drawGraph);
     },
 
     reloadModel: function () {
-        console.log("reloadModel:" + this.current_cancer + "," + this.selected_genes["x"] + "," + this.selected_genes["y"]);
-        if (!this.current_cancer) return;
+        this.$el.find(".download-container").empty();
+        this.$el.find(".feature-selector-x").empty();
+        this.$el.find(".feature-selector-y").empty();
+
+        if (_.isEmpty(this.selected_tumor_types)) return;
         if (!this.selected_genes["x"]) return;
         if (!this.selected_genes["y"]) return;
 
@@ -107,7 +147,7 @@ module.exports = Backbone.View.extend({
         fmxModel.fetch({
             "data": {
                 "gene": [this.selected_genes["x"], this.selected_genes["y"]],
-                "cancer": this.current_cancer
+                "cancer": this.selected_tumor_types
             },
             "traditional": true,
             success: function () {
@@ -118,53 +158,82 @@ module.exports = Backbone.View.extend({
 
     initFeatureLabelSelector: function () {
         _.each(["x", "y"], function (axis) {
-            var UL = this.$el.find(".feature-selector-" + axis);
-            UL.empty();
+            var UL = this.$el.find(".feature-selector-" + axis).empty();
 
             var selected_gene = this.selected_genes[axis];
-            var selected_cancer = this.current_cancer.toLowerCase();
-            var selected_features = _.filter(this.model.get("items"), function (feature) {
-                return (feature.id.indexOf(selected_gene) >= 0) && _.isEqual(selected_cancer, feature.cancer);
-            });
-            _.each(_.groupBy(selected_features, "source"), function(features, source) {
+            var selected_cancers = this.selected_tumor_types;
+            var selected_feature_ids = _.uniq(_.compact(_.map(this.model.get("items"), function (feature) {
+                if (feature.id.indexOf(selected_gene) >= 0 && selected_cancers.indexOf(feature.cancer.toUpperCase()) >= 0) return feature.id;
+                return null;
+            })));
+
+            var selected_features = _.map(selected_feature_ids, function(selected_feature_id) {
+                return _.first(this.feature_map[selected_feature_id]);
+            }, this);
+
+            _.each(_.groupBy(selected_features, "source"), function (features, source) {
                 if (features.length == 1) {
                     var feature = _.first(features);
-                    var label = (feature.modifier) ? " (" + feature.modifier + ")": "";
-                    UL.append(LineItemTemplate({ "label": source.toUpperCase() + label, "id": feature.id, "a_class": "selector" }));
+                    var label = feature.modifier || "chr" + feature.chr + ":" + feature.start + ":" + feature.end + ":" + feature.strand;
+                    UL.append(LineItemTemplate({ "label": source.toUpperCase() + ": " + label, "id": feature.id, "a_class": "selector" }));
                 }
                 if (features.length > 1) {
                     UL.append(source.toUpperCase());
                     _.each(features, function(feature) {
-                        UL.append(LineItemTemplate({ "label": "- " + feature.modifier, "id": feature.id, "a_class": "selector" }));
+                        var label = feature.modifier || "chr" + feature.chr + ":" + feature.start + ":" + feature.end + ":" + feature.strand;
+                        UL.append(LineItemTemplate({ "label": "- " + label, "id": feature.id, "a_class": "selector" }));
                     });
                 }
             });
 
             if (!_.isEmpty(selected_features)) {
-                this.selected_features[axis] = _.first(selected_features).id;
+                var feature_id = _.first(selected_features).id;
+                this.selected_features[axis] = feature_id;
+                var firstEl = _.find(UL.find("a"), function(link) {
+                    return _.isEqual($(link).data("id"), feature_id);
+                });
+                $(firstEl).parent().addClass("active");
             }
 
             var _this = this;
             UL.find(".selector").click(function (e) {
+                UL.find(".active").removeClass("active");
+                $(e.target).parent().addClass("active");
                 _this.selected_features[axis] = $(e.target).data("id");
                 _this.drawGraph();
             });
         }, this);
     },
 
-    drawGraph: function () {
-        this.$el.find(".scatterplot-container").empty();
+    initGraph: function () {
+        if (this.carve) return;
 
-        var data_array = this.selectedFeatureData();
-        if (_.isEmpty(data_array)) return;
+        console.log("initGraph:splitiscope init");
 
-        var splitiscope = Splitiscope({
+        var _this = this;
+
+        this.carve = carve({
             "radius": 8,
             "margin": {
                 "top": 10, "left": 10, "bottom": 30, "right": 40
             }
         })(_.first(this.$el.find(".scatterplot-container")));
-        splitiscope.axes({
+        this.carve.colorFn(function (categoryValue) {
+            return _this.colorsByTumorType[categoryValue.toUpperCase()];
+        });
+        this.carve.colorBy({
+            "label": "cancer",
+            "list": _.keys(this.colorsByTumorType),
+            "colors": _.values(this.colorsByTumorType)
+        });
+        console.log("initGraph:splitiscope ready");
+    },
+
+    drawGraph: function () {
+        var data_array = this.selectedFeatureData();
+
+        var _this = this;
+        this.carve.axes({
             "attr": {
                 "x": this.selected_features["x"],
                 "y": this.selected_features["y"]
@@ -174,11 +243,8 @@ module.exports = Backbone.View.extend({
                 "y": this.getFeatureAxisLabel("y")
             }
         });
-        splitiscope.data(data_array);
-        splitiscope.render();
-
-        var downloadEl = this.$el.find(".download-container").empty();
-        splitiscope.on("partition", function (partition) {
+        this.carve.data(data_array).render();
+        this.carve.on("partitioncomplete", function (partition) {
             var sample_ids = [];
             _.each(partition, function (part, key) {
                 var part_samples = _.compact(_.map(data_array, function (item) {
@@ -194,28 +260,42 @@ module.exports = Backbone.View.extend({
                 }
             });
 
-            if (!_.isEmpty(sample_ids)) {
-                var keys = _.without(_.keys(_.first(data_array)), "id");
+            _this.prepareDownloadLink(sample_ids, data_array);
+        });
 
-                var filecontents = [];
-                filecontents.push("ID" + "%09" + keys.join("%09"));
+        _.defer(function() {
+            _this.prepareDownloadLink(_.pluck(data_array, "id"), data_array);
+        });
+    },
 
-                _.each(data_array, function(item) {
-                    if (sample_ids.indexOf(item.id) >= 0) {
-                        var values = _.map(keys, function(key) {
-                            return item[key];
-                        });
-                        filecontents.push(item.id + "%09" + values.join("%09"));
-                    }
+    prepareDownloadLink: function (sample_ids, data_array) {
+        console.log("prepareDownloadLink(" + sample_ids.length + "," + data_array.length + ")");
+        var downloadEl = this.$el.find(".download-container").empty();
+        if (_.isEmpty(sample_ids)) {
+            downloadEl.html("No samples matching selection");
+            return;
+        }
+
+        var keys = _.without(_.without(_.keys(_.first(data_array)), "id"), "cancer");
+
+        var filecontents = [];
+        filecontents.push("ID" + "%09" + "TUMOR_TYPE" + "%09" + keys.join("%09"));
+
+        _.each(data_array, function (item) {
+            if (sample_ids.indexOf(item.id) >= 0) {
+                var values = _.map(keys, function (key) {
+                    return item[key];
                 });
-
-                downloadEl.html(DataUriTemplate({
-                    "filename": "genespot_selected_samples.tsv",
-                    "content": filecontents.join("%0A"),
-                    "label": "Download " + sample_ids.length + " Samples"
-                }));
+                filecontents.push(item.id + "%09" + item.cancer.toUpperCase() + "%09" + values.join("%09"));
             }
         });
+
+        var SAMPLES = sample_ids.length > 1 ? " Samples" : " Sample";
+        downloadEl.html(DataUriTemplate({
+            "filename": "genespot_selected_samples.tsv",
+            "content": filecontents.join("%0A"),
+            "label": "Download " + sample_ids.length + SAMPLES
+        }));
     },
 
     selectedFeatureData: function () {
@@ -227,31 +307,38 @@ module.exports = Backbone.View.extend({
         var y_features = this.feature_map[y_feature];
         if (_.isEmpty(x_features) || _.isEmpty(y_features)) return [];
 
-        var x_values = _.first(x_features).values || {};
-        var y_values = _.first(y_features).values || {};
+        var x_features_by_tumor_type = _.groupBy(x_features, "cancer");
+        var y_features_by_tumor_type = _.groupBy(y_features, "cancer");
 
-        var datapoints = _.map(x_values, function (x_val, point_id) {
-            var y_val = y_values[point_id];
-
-            if (!_.isEqual(x_val, "NA") && !_.isEqual(y_val, "NA")) {
-                var dataPoint = {"id": point_id};
-                dataPoint[x_feature] = x_val;
-                dataPoint[y_feature] = y_val;
-                return dataPoint;
+        var all_datapoints = [];
+        _.each(x_features_by_tumor_type, function (x_feats, tumor_type) {
+            if (this.selected_tumor_types.indexOf(tumor_type.toUpperCase()) >= 0) {
+                var y_feats = y_features_by_tumor_type[tumor_type];
+                if (!_.isEmpty(x_feats) && !_.isEmpty(y_feats)) {
+                    var x_values = _.first(x_feats).values || {};
+                    var y_values = _.first(y_feats).values || {};
+                    _.each(x_values, function (x_val, point_id) {
+                        var y_val = y_values[point_id];
+                        if (!_.isEqual(x_val, "NA") && !_.isEqual(y_val, "NA")) {
+                            var dataPoint = {
+                                "id": point_id,
+                                "cancer": tumor_type.toUpperCase()
+                            };
+                            dataPoint[x_feature] = x_val;
+                            dataPoint[y_feature] = y_val;
+                            all_datapoints.push(dataPoint);
+                        }
+                    });
+                }
             }
-        });
-        return _.compact(datapoints);
+        }, this);
+        return all_datapoints;
     },
 
     getFeatureAxisLabel: function (axis) {
-        var features = this.feature_map[this.selected_features[axis]];
-        if (features) {
-            var featureArray = _.groupBy(features, "cancer")[this.current_cancer.toLowerCase()];
-            if (!_.isEmpty(featureArray)) {
-                var feature = _.first(featureArray);
-                return feature.label + " " + feature.source + " (" + feature.modifier + ")";
-            }
-        }
-        return this.selected_features[axis];
+        var featureId = this.selected_features[axis];
+        var feature = _.first(this.feature_map[featureId]);
+        if (feature && feature.label && feature.source && feature.modifier) return feature.label + " " + feature.source + " (" + feature.modifier + ")";
+        return featureId;
     }
 });

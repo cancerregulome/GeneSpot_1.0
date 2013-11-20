@@ -52,7 +52,17 @@ module.exports = Backbone.Router.extend({
     },
 
     atlasView: function() {
-        var model = new qed.Models.Default({ "data_uri": "svc/data/qed_atlas.json" });
+        var atlasUri = "overrides/data/qed_atlas.json";
+
+        $.ajax({
+            "url": atlasUri,
+            "async": false,
+            "error": function() {
+                atlasUri = "svc/data/qed_atlas.json";
+            }
+        });
+
+        var model = new qed.Models.Default({ "data_uri": atlasUri });
         _.defer(function() {
             model.fetch({
                 success: function() {
