@@ -210,26 +210,13 @@ python websvcs/tornadoapp.py --config_file=/local/path/to/tornado.config
 
 # Initial Dev Setup #
 1. Clone this repository
-
 2. Install Required Dependencies (see above)
-
 3. Download Third-Party JavaScript libraries and extract into root directory
-
-4. Build Web App
-
-```
-  npm install
-  npm start
-```
-
+4. Build Web App 
+   ``` npm install ```  
+   ``` npm start ```  
 5. Start tornado web services
+   ``` python websvcs/tornadoapp.py --config_file=/local/path/to/tornado.config ```  
+6. Open web browser at
+   [http://localhost:3333](http://localhost:3333)  
 
-```
-  python websvcs/tornadoapp.py --config_file=/local/path/to/tornado.config
-```
-
-6. Open web browser 
-
-```
-http://localhost:3333
-```
