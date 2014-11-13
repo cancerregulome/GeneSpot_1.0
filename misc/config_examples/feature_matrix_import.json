@@ -1,0 +1,11 @@
+{
+    "label":"Data set label",
+    "description":"Description of the data set",
+    "collection": "collection_name",
+    "files": [
+	    {
+	    	"cancer": "gbm",
+	    	"path": "/path/to/gbm_features.tsv"
+	    }
+    ]
+}

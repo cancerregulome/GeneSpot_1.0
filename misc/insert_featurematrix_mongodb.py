@@ -1,5 +1,6 @@
 import argparse
 import csv
+import json
 import os
 import pymongo
 import sys
@@ -37,28 +38,6 @@ def feature_id_extract(feature):
         "label": feature_parts[2],
         "modifier": feature_parts[7]
     }
-
-
-def iterate_fmx_files(dir_path):
-    for filename in os.listdir(dir_path):
-        # Suppose that file name format is '<cancer>.<name>.<date>.tsv',
-        # for example 'blca.newMerge.05nov.tsv'
-        fileparts = filename.strip().lower().split('.')
-        if (len(fileparts) != 4):
-            continue
-
-        subtype = fileparts[0]
-        name = fileparts[1]
-        filedate = fileparts[2]
-        filetype = fileparts[3]
-
-        if filetype == 'tsv':
-            yield {
-            'subtype': subtype,
-            'name': name,
-            "date": filedate,
-            'path': os.path.join(dir_path, filename)
-            }
 
 
 def build_value_dict_categorical(ids, values):
@@ -102,7 +81,7 @@ def iterate_features(descriptor):
                 continue
 
             feature_object = feature_id_extract(feature_id)
-            feature_object['cancer'] = descriptor['subtype']
+            feature_object['cancer'] = descriptor['cancer'].upper()
 
             if feature_object['type'] == 'N':
                 feature_object['values'] = build_value_dict_numerical(ids, values)
@@ -119,6 +98,30 @@ def iterate_features(descriptor):
         print('   ' + info)
 
 
+def validate_import_config(config):
+    required_fields = frozenset(['label', 'description', 'collection', 'files'])
+
+    for field in required_fields:
+        if field not in config:
+            raise Exception("Required field '" + field + "' is missing")
+
+    for file_desc in config['files']:
+        # The file has to exist
+        file_path = file_desc['path']
+        if not os.path.isfile(file_path):
+            raise Exception("Data file does not exist: " + file_path)
+        # The 'cancer' field has to exist
+        if 'cancer' not in file_desc:
+            raise Exception("Required field 'cancer' is missing from file '" + file_path + "'")
+
+
+def load_config_json(file_path):
+    json_file = open(file_path, 'rb')
+    data = json.load(json_file)
+    json_file.close()
+    return data
+
+
 def connect_database(hostname, port):
     connection = pymongo.Connection(hostname, port)
     return connection
@@ -126,13 +129,20 @@ def connect_database(hostname, port):
 
 def main():
     parser = argparse.ArgumentParser(description="TCGA feature matrix to MongoDB import utility")
-    parser.add_argument('--fmx-dir', required=True, help='Path to directory containing the feature matrices')
     parser.add_argument('--host', required=True, help='Hostname')
     parser.add_argument('--port', required=True, type=int, help='Port')
     parser.add_argument('--db', required=True, help='Database name')
-    parser.add_argument('--collection', required=True, help='Collection name')
-
+    parser.add_argument('--import-config', required=True, help='Import configuration JSON-file')
     args = parser.parse_args()
+
+    # Read in the config file
+    try:
+        import_config = load_config_json(args.import_config)
+        validate_import_config(import_config)
+    except Exception as e:
+        print('Error while reading import configuration JSON: ' + str(e))
+        print('Quitting...')
+        sys.exit(1)
 
     # Try open connection first, exit in case of failure
     conn = None
@@ -142,10 +152,10 @@ def main():
         print("Failed to connect to database at " + args.host + ":" + str(args.port))
         sys.exit(1)
 
-    collection = conn[args.db][args.collection]
+    collection = conn[args.db][import_config['collection']]
 
-    for fmx_descriptor in iterate_fmx_files(args.fmx_dir):
-        for feature_object in iterate_features(fmx_descriptor):
+    for file_info in import_config['files']:
+        for feature_object in iterate_features(file_info):
             collection.insert(feature_object)
 
     conn.close()
